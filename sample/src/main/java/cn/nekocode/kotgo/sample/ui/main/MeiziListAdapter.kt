@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import butterknife.bindView
+import cn.nekocode.kotgo.lib.request.Request
 
 import cn.nekocode.kotgo.sample.R
 import cn.nekocode.kotgo.sample.data.dto.Meizi
-import com.squareup.picasso.Picasso
 import org.jetbrains.anko.layoutInflater
 import org.jetbrains.anko.onClick
 import org.jetbrains.anko.onLongClick
@@ -62,7 +62,7 @@ class MeiziListAdapter(private val list: List<Meizi>): RecyclerView.Adapter<Recy
                 onLongClick { onMeiziItemLongClickListener?.invoke(meizi) ?: false }
             }
 
-            Picasso.with(itemView.context).load(meizi.url).centerCrop().fit().into(imageView)
+            Request.image(imageView, meizi.url)
             textView.text = meizi.id
             textView2.text = "${meizi.who} - ${meizi.type}"
         }

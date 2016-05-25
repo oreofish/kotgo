@@ -8,23 +8,10 @@ kapt {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    // Retrofit
-    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-    compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
-
-    // Storage library
-    compile "com.github.orhanobut:hawk:$hawkVersion"
-
-    // Debug library
-    compile "com.facebook.stetho:stetho:$stethoVersion"
-    compile "com.facebook.stetho:stetho-okhttp3:$stethoVersion"
+    provided project(":lib")
 
     // Instance State
     compile "com.github.grandstaish.paperparcel:paperparcel:$paperparcelVersion"
     compile "com.github.grandstaish.paperparcel:paperparcel-kotlin:$paperparcelVersion"
     kapt "com.github.grandstaish.paperparcel:compiler:$paperparcelVersion"
-
-    compile kotlib
 }

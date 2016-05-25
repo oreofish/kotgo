@@ -8,10 +8,10 @@ import butterknife.bindView
 import cn.nekocode.kotgo.component.ui.BaseFragment
 import cn.nekocode.kotgo.component.ui.FragmentActivity
 import cn.nekocode.kotgo.component.util.args
+import cn.nekocode.kotgo.lib.request.Request
 import cn.nekocode.kotgo.sample.R
 import cn.nekocode.kotgo.sample.data.dto.Meizi
 import cn.nekocode.kotgo.sample.data.dto.MeiziParcel
-import com.squareup.picasso.Picasso
 
 /**
  * Created by nekocode on 16/3/3.
@@ -38,6 +38,6 @@ class Page2Fragment: BaseFragment(), Contract.View {
         val meizi: Meizi = arguments.getParcelable<MeiziParcel>("meizi").data
 
         toolbar.title = "${meizi.id}"
-        Picasso.with(activity).load(meizi.url).centerCrop().fit().into(imageView)
+        Request.image(imageView, meizi.url)
     }
 }

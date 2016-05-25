@@ -1,9 +1,9 @@
 package cn.nekocode.kotgo.sample.data.model
 
+import cn.nekocode.kotgo.lib.store.Store
 import cn.nekocode.kotgo.sample.data.dto.Meizi
 import cn.nekocode.kotgo.sample.data.exception.GankServiceException
 import cn.nekocode.kotgo.sample.data.service.GankService
-import com.orhanobut.hawk.Hawk
 import rx.Observable
 import rx.schedulers.Schedulers
 
@@ -17,12 +17,12 @@ object MeiziModel {
             GankService.api.getMeizi(count, pageNum)
                     .subscribeOn(Schedulers.io())
                     .map {
-                        Hawk.put("meizis", it.results)
+                        Store["meizis"] = it.results
                         it.results
                     }
                     .onErrorResumeNext {
                         // Fetech data from local cache
-                        val meiziList: List<Meizi> = Hawk.get("meizis")
+                        val meiziList: List<Meizi> = Store["meizis"]
                                 ?: throw GankServiceException(it.message)
                         Observable.just(meiziList)
                     }

@@ -1,0 +1,38 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply from: '../config.gradle'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Android support library
+    compile "com.android.support:appcompat-v7:$supportLibVersion"
+    compile "com.android.support:recyclerview-v7:$supportLibVersion"
+
+    // Reactive library
+    compile "io.reactivex:rxkotlin:$rxkotlinVersion"
+    compile "io.reactivex:rxandroid:$rxandroidVersion"
+
+    // DSL
+    compile "org.jetbrains.anko:anko-sdk15:$ankoVersion" // sdk19, sdk21, sdk23 are also available
+    compile "org.jetbrains.anko:anko-support-v4:$ankoVersion" // In case you need support-v4 bindings
+    compile "org.jetbrains.anko:anko-appcompat-v7:$ankoVersion" // For appcompat-v7 bindings
+
+    // Artwork
+    compile "com.squareup.picasso:picasso:$picassoVersion"
+
+    // Retrofit
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+
+    // Storage library
+    compile "com.github.orhanobut:hawk:$hawkVersion"
+
+    // Debug library
+    compile "com.facebook.stetho:stetho:$stethoVersion"
+    compile "com.facebook.stetho:stetho-okhttp3:$stethoVersion"
+
+    // Logger
+    compile 'com.jakewharton.timber:timber:4.1.2'
+}

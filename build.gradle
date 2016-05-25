@@ -29,7 +29,3 @@ allprojects {
         }
     }
 }
-
-ext {
-    kotlib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-}

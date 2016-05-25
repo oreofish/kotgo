@@ -1,6 +1,6 @@
 package cn.nekocode.kotgo.sample.data.service
 
-import cn.nekocode.kotgo.sample.data.DataLayer
+import cn.nekocode.kotgo.lib.request.Request
 import cn.nekocode.kotgo.sample.data.dto.Meizi
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
@@ -23,9 +23,9 @@ class GankService {
         init {
             val restAdapter = Retrofit.Builder()
                     .baseUrl(API_HOST_URL)
-                    .addConverterFactory(GsonConverterFactory.create(DataLayer.gson))
+                    .addConverterFactory(GsonConverterFactory.create(Request.gson))
                     .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                    .client(DataLayer.okHttpClient)
+                    .client(Request.client)
                     .build()
 
             api = restAdapter.create(APIs::class.java)
