@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "cn.nekocode.kotgo.sample"
-        minSdkVersion 15
+        minSdkVersion 17
         targetSdkVersion 23
         versionCode 127
         versionName projectVersion
