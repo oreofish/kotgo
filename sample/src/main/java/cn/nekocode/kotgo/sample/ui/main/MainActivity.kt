@@ -15,8 +15,9 @@ class MainActivity: SingleFragmentActivity<MainFragment>() {
 
         bus {
             subscribe(String::class.java) {
-                if(it.equals("Load finished.")) {
-                    toolbar.title = "Meizi List - Load finished"
+                when(it) {
+                    "Load finished." -> toolbar.title = "Meizi List - Load finished"
+                    else -> {}
                 }
             }
         }
