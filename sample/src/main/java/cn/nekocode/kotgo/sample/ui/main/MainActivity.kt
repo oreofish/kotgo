@@ -2,6 +2,7 @@ package cn.nekocode.kotgo.sample.ui.main
 
 import android.os.Bundle
 import cn.nekocode.kotgo.component.rx.bus
+import cn.nekocode.kotgo.component.ui.BaseActivity
 import cn.nekocode.kotgo.component.ui.SingleFragmentActivity
 import cn.nekocode.kotgo.sample.R
 

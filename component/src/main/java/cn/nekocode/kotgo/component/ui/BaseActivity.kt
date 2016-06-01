@@ -6,25 +6,21 @@ import android.os.Handler
 import android.os.Message
 import android.support.annotation.CallSuper
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
+import android.util.TypedValue
+import butterknife.bindView
 import cn.nekocode.kotgo.component.rx.RxLifecycle
+import org.jetbrains.anko.*
 import java.lang.ref.WeakReference
 
 abstract class BaseActivity: AppCompatActivity(), RxLifecycle.Impl {
-    class GlobalHandler(activity: BaseActivity): Handler() {
-        private val mOuter = WeakReference(activity)
-
-        override fun handleMessage(msg: Message) {
-            mOuter.get()?.apply {
-                if (msg.what == -101 && msg.arg1 == -102 && msg.arg2 == -103) {
-                    val runnable = (msg.obj as WeakReference<() -> Unit>).get()
-                    runnable?.invoke()
-                    return
-                }
-
-                this.handler(msg)
-            }
-        }
+    companion object {
+        const val ID_TOOLBAR = 1
+        const val ID_FRAGMENT_CONTENT = 2
     }
+
+    final val toolbar: Toolbar by bindView(ID_TOOLBAR)
+    open var toolbarLayoutId: Int? = null
 
     override final val lifecycle = RxLifecycle()
     val handler: GlobalHandler by lazy {
@@ -52,6 +48,45 @@ abstract class BaseActivity: AppCompatActivity(), RxLifecycle.Impl {
         msg.arg2 = -103
         msg.obj = WeakReference<() -> Unit>(runnable)
         handler.sendMessageDelayed(msg, delayMillis)
+    }
+
+    @CallSuper
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        relativeLayout {
+            if(toolbarLayoutId != null) {
+                include<Toolbar>(toolbarLayoutId!!) {
+                    id = ID_TOOLBAR
+                }.lparams(width = matchParent, height = getToolbarSize())
+
+                frameLayout {
+                    id = ID_FRAGMENT_CONTENT
+                }.lparams(width = matchParent, height = matchParent) {
+                    below(ID_TOOLBAR)
+                }
+
+            } else {
+                frameLayout {
+                    id = ID_FRAGMENT_CONTENT
+                }.lparams(width = matchParent, height = matchParent)
+
+            }
+        }
+
+        if(toolbarLayoutId != null) {
+            setSupportActionBar(toolbar)
+        }
+    }
+
+    final fun getToolbarSize(): Int {
+        TypedValue().apply {
+            if(theme.resolveAttribute(android.R.attr.actionBarSize, this, true)) {
+                return TypedValue.complexToDimensionPixelSize(this.data, resources.displayMetrics)
+            }
+        }
+
+        return dip(50)
     }
 
     @CallSuper
@@ -85,5 +120,21 @@ abstract class BaseActivity: AppCompatActivity(), RxLifecycle.Impl {
         trans.commit()
 
         return fragment!!
+    }
+
+    class GlobalHandler(activity: BaseActivity): Handler() {
+        private val mOuter = WeakReference(activity)
+
+        override fun handleMessage(msg: Message) {
+            mOuter.get()?.apply {
+                if (msg.what == -101 && msg.arg1 == -102 && msg.arg2 == -103) {
+                    val runnable = (msg.obj as WeakReference<() -> Unit>).get()
+                    runnable?.invoke()
+                    return
+                }
+
+                this.handler(msg)
+            }
+        }
     }
 }
