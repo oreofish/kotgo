@@ -10,24 +10,18 @@ import cn.nekocode.kotgo.component.rx.RxLifecycle
 import java.lang.ref.WeakReference
 
 abstract class BaseActivity: AppCompatActivity(), RxLifecycle.Impl {
-    companion object {
-        class GlobalHandler: Handler {
-            private val mOuter: WeakReference<BaseActivity>
+    class GlobalHandler(activity: BaseActivity): Handler() {
+        private val mOuter = WeakReference(activity)
 
-            constructor(activity: BaseActivity) {
-                mOuter = WeakReference(activity)
-            }
-
-            override fun handleMessage(msg: Message) {
-                mOuter.get()?.apply {
-                    if (msg.what == -101 && msg.arg1 == -102 && msg.arg2 == -103) {
-                        val runnable = (msg.obj as WeakReference<() -> Unit>).get()
-                        runnable?.invoke()
-                        return
-                    }
-
-                    this.handler(msg)
+        override fun handleMessage(msg: Message) {
+            mOuter.get()?.apply {
+                if (msg.what == -101 && msg.arg1 == -102 && msg.arg2 == -103) {
+                    val runnable = (msg.obj as WeakReference<() -> Unit>).get()
+                    runnable?.invoke()
+                    return
                 }
+
+                this.handler(msg)
             }
         }
     }
