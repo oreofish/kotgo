@@ -1,4 +1,4 @@
-package cn.nekocode.kotgo.sample.data.dto
+package com.meibug.tunet
 
 import android.os.Parcel
 import android.os.Parcelable

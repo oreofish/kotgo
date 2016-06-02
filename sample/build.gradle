@@ -48,6 +48,9 @@ dependencies {
     // Artwork
     compile "com.squareup.picasso:picasso:2.5.2"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    // Test
+    testCompile 'junit:junit:4.12'
 }
 
 buildscript {
