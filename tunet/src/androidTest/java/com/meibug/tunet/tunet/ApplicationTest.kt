@@ -1,4 +1,4 @@
-package com.meibug.tunet.tunet
+package com.meibug.tunet.tunet;
 
 import android.app.Application
 import android.test.ApplicationTestCase

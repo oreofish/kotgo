@@ -1,4 +1,4 @@
-package com.meibug.tunet.tunet
+package com.meibug.tunet
 
 import org.junit.Test
 
