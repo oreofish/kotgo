@@ -19,8 +19,6 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
 import com.meibug.tunet.Client;
 import com.meibug.tunet.ClientDiscoveryHandler;
 import com.meibug.tunet.Connection;
@@ -30,14 +28,15 @@ import com.meibug.tunet.Server;
 import com.meibug.tunet.ServerDiscoveryHandler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
-import static com.esotericsoftware.minlog.Log.*;
-import static com.esotericsoftware.minlog.Log.info;
+import static com.meibug.tunet.util.Log.*;
+import static com.meibug.tunet.util.Log.info;
 
 public class DiscoverHostTest extends KryoNetTestCase {
 
@@ -108,10 +107,10 @@ public class DiscoverHostTest extends KryoNetTestCase {
 			}
 
 			@Override
-			public void onDiscoveredHost (DatagramPacket datagramPacket, Kryo kryo) {
+			public void onDiscoveredHost (DatagramPacket datagramPacket, Serialization serialization) {
 				if (input != null) {
 					DiscoveryResponsePacket packet;
-					packet = (DiscoveryResponsePacket)kryo.readClassAndObject(input);
+					packet = (DiscoveryResponsePacket)serialization.readClassAndObject(input);
 					info("test", "packet.id = " + packet.id);
 					info("test", "packet.gameName = " + packet.gameName);
 					info("test", "packet.playerName = " + packet.playerName);
@@ -136,7 +135,7 @@ public class DiscoverHostTest extends KryoNetTestCase {
 		// It wouldn't be needed if the real server was using UDP.
 		final Server broadcastServer = new Server();
 
-		broadcastServer.getKryo().register(DiscoveryResponsePacket.class);
+		// broadcastServer.getSerialization().register(DiscoveryResponsePacket.class);
 		broadcastServer.setDiscoveryHandler(serverDiscoveryHandler);
 
 		startEndPoint(broadcastServer);
@@ -156,7 +155,7 @@ public class DiscoverHostTest extends KryoNetTestCase {
 
 		Client client = new Client();
 
-		client.getKryo().register(DiscoveryResponsePacket.class);
+		// client.getSerialization().register(DiscoveryResponsePacket.class);
 		client.setDiscoveryHandler(clientDiscoveryHandler);
 
 		InetAddress host = client.discoverHost(udpPort, 2000);
@@ -184,4 +183,37 @@ public class DiscoverHostTest extends KryoNetTestCase {
 		public String playerName;
 	}
 
+	public static class Input extends InputStream {
+		protected byte[] buffer;
+		protected int position;
+		protected int capacity;
+		protected int limit;
+		protected long total;
+		protected char[] chars = new char[32];
+		protected InputStream inputStream;
+
+		public Input (byte[] buffer) {
+			if (buffer == null) throw new IllegalArgumentException("bytes cannot be null.");
+			buffer = buffer;
+			position = 0;
+			limit = buffer.length;
+			capacity = buffer.length;
+			total = 0;
+			inputStream = null;
+		}
+
+		@Override
+		public int read() throws IOException {
+			return 0;
+		}
+
+		public void close () {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException ignored) {
+				}
+			}
+		}
+	}
 }

@@ -19,8 +19,6 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.util.IntMap;
 import com.meibug.tunet.FrameworkMessage.DiscoverHost;
 import com.meibug.tunet.FrameworkMessage.RegisterTCP;
 import com.meibug.tunet.FrameworkMessage.RegisterUDP;
@@ -34,20 +32,22 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
-import static com.esotericsoftware.minlog.Log.*;
-import static com.esotericsoftware.minlog.Log.DEBUG;
-import static com.esotericsoftware.minlog.Log.ERROR;
-import static com.esotericsoftware.minlog.Log.INFO;
-import static com.esotericsoftware.minlog.Log.TRACE;
-import static com.esotericsoftware.minlog.Log.WARN;
-import static com.esotericsoftware.minlog.Log.debug;
-import static com.esotericsoftware.minlog.Log.error;
-import static com.esotericsoftware.minlog.Log.info;
-import static com.esotericsoftware.minlog.Log.trace;
-import static com.esotericsoftware.minlog.Log.warn;
+import static com.meibug.tunet.util.Log.*;
+import static com.meibug.tunet.util.Log.DEBUG;
+import static com.meibug.tunet.util.Log.ERROR;
+import static com.meibug.tunet.util.Log.INFO;
+import static com.meibug.tunet.util.Log.TRACE;
+import static com.meibug.tunet.util.Log.WARN;
+import static com.meibug.tunet.util.Log.debug;
+import static com.meibug.tunet.util.Log.error;
+import static com.meibug.tunet.util.Log.info;
+import static com.meibug.tunet.util.Log.trace;
+import static com.meibug.tunet.util.Log.warn;
 
 /** Manages TCP and optionally UDP connections from many {@link Client Clients}.
  * @author Nathan Sweet <misc@n4te.com> */
@@ -59,7 +59,7 @@ public class Server implements EndPoint {
 	private ServerSocketChannel serverChannel;
 	private UdpConnection udp;
 	private Connection[] connections = {};
-	private IntMap<Connection> pendingConnections = new IntMap();
+	private Map<Integer, Connection> pendingConnections = new HashMap<>();
 	Listener[] listeners = {};
 	private Object listenerLock = new Object();
 	private int nextConnectionID = 1;
@@ -71,27 +71,23 @@ public class Server implements EndPoint {
 	private Listener dispatchListener = new Listener() {
 		public void connected (Connection connection) {
 			Listener[] listeners = Server.this.listeners;
-			for (int i = 0, n = listeners.length; i < n; i++)
-				listeners[i].connected(connection);
+			for (Listener listener : listeners) listener.connected(connection);
 		}
 
 		public void disconnected (Connection connection) {
 			removeConnection(connection);
 			Listener[] listeners = Server.this.listeners;
-			for (int i = 0, n = listeners.length; i < n; i++)
-				listeners[i].disconnected(connection);
+			for (Listener listener : listeners) listener.disconnected(connection);
 		}
 
 		public void received (Connection connection, Object object) {
 			Listener[] listeners = Server.this.listeners;
-			for (int i = 0, n = listeners.length; i < n; i++)
-				listeners[i].received(connection, object);
+			for (Listener listener : listeners) listener.received(connection, object);
 		}
 
 		public void idle (Connection connection) {
 			Listener[] listeners = Server.this.listeners;
-			for (int i = 0, n = listeners.length; i < n; i++)
-				listeners[i].idle(connection);
+			for (Listener listener : listeners) listener.idle(connection);
 		}
 	};
 
@@ -115,7 +111,7 @@ public class Server implements EndPoint {
 	 *           <p>
 	 *           The object buffers should be sized at least as large as the largest object that will be sent or received. */
 	public Server (int writeBufferSize, int objectBufferSize) {
-		this(writeBufferSize, objectBufferSize, new KryoSerialization());
+		this(writeBufferSize, objectBufferSize, new JsonSerialization());
 	}
 
 	public Server (int writeBufferSize, int objectBufferSize, Serialization serialization) {
@@ -139,10 +135,6 @@ public class Server implements EndPoint {
 
 	public Serialization getSerialization () {
 		return serialization;
-	}
-
-	public Kryo getKryo () {
-		return ((KryoSerialization)serialization).getKryo();
 	}
 
 	/** Opens a TCP only server.

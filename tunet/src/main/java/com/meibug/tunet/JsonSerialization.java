@@ -21,8 +21,7 @@ package com.meibug.tunet;
 
 import com.esotericsoftware.jsonbeans.Json;
 import com.esotericsoftware.jsonbeans.JsonException;
-import com.esotericsoftware.kryo.io.ByteBufferInputStream;
-import com.esotericsoftware.kryo.io.ByteBufferOutputStream;
+import com.google.gson.Gson;
 import com.meibug.tunet.FrameworkMessage.DiscoverHost;
 import com.meibug.tunet.FrameworkMessage.KeepAlive;
 import com.meibug.tunet.FrameworkMessage.Ping;
@@ -30,28 +29,19 @@ import com.meibug.tunet.FrameworkMessage.RegisterTCP;
 import com.meibug.tunet.FrameworkMessage.RegisterUDP;
 
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
-import static com.esotericsoftware.minlog.Log.*;
-import static com.esotericsoftware.minlog.Log.INFO;
-import static com.esotericsoftware.minlog.Log.info;
+import static com.meibug.tunet.util.Log.*;
+import static com.meibug.tunet.util.Log.INFO;
+import static com.meibug.tunet.util.Log.info;
 
 public class JsonSerialization implements Serialization {
-	private final Json json = new Json();
-	private final ByteBufferInputStream byteBufferInputStream = new ByteBufferInputStream();
-	private final ByteBufferOutputStream byteBufferOutputStream = new ByteBufferOutputStream();
-	private final OutputStreamWriter writer = new OutputStreamWriter(byteBufferOutputStream);
+	private final Gson json = new Gson();
 	private boolean logging = true, prettyPrint = true;
 	private byte[] logBuffer = {};
 
 	public JsonSerialization () {
-		json.addClassTag("RegisterTCP", RegisterTCP.class);
-		json.addClassTag("RegisterUDP", RegisterUDP.class);
-		json.addClassTag("KeepAlive", KeepAlive.class);
-		json.addClassTag("DiscoverHost", DiscoverHost.class);
-		json.addClassTag("Ping", Ping.class);
-
-		json.setWriter(writer);
 	}
 
 	public void setLogging (boolean logging, boolean prettyPrint) {
@@ -60,32 +50,20 @@ public class JsonSerialization implements Serialization {
 	}
 
 	public void write (Connection connection, ByteBuffer buffer, Object object) {
-		byteBufferOutputStream.setByteBuffer(buffer);
-		int start = buffer.position();
+		String str = (String)object;
 		try {
-			json.writeValue(object, Object.class, null);
-			writer.flush();
-		} catch (Exception ex) {
-			throw new JsonException("Error writing object: " + object, ex);
+			buffer.put(str.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
 		if (INFO && logging) {
-			int end = buffer.position();
-			buffer.position(start);
-			buffer.limit(end);
-			int length = end - start;
-			if (logBuffer.length < length) logBuffer = new byte[length];
-			buffer.get(logBuffer, 0, length);
-			buffer.position(end);
-			buffer.limit(buffer.capacity());
-			String message = new String(logBuffer, 0, length);
-			if (prettyPrint) message = json.prettyPrint(message);
+			String message = new String(str);
 			info("Wrote: " + message);
 		}
 	}
 
 	public Object read (Connection connection, ByteBuffer buffer) {
-		byteBufferInputStream.setByteBuffer(buffer);
-		return json.fromJson(Object.class, byteBufferInputStream);
+		return buffer.toString();
 	}
 
 	public void writeLength (ByteBuffer buffer, int length) {

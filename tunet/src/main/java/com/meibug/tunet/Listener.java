@@ -28,11 +28,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.esotericsoftware.minlog.Log.*;
-import static com.esotericsoftware.minlog.Log.DEBUG;
-import static com.esotericsoftware.minlog.Log.ERROR;
-import static com.esotericsoftware.minlog.Log.debug;
-import static com.esotericsoftware.minlog.Log.error;
+import static com.meibug.tunet.util.Log.*;
+import static com.meibug.tunet.util.Log.DEBUG;
+import static com.meibug.tunet.util.Log.ERROR;
+import static com.meibug.tunet.util.Log.debug;
+import static com.meibug.tunet.util.Log.error;
 
 /** Used to be notified about connection events. */
 public class Listener {

@@ -19,8 +19,6 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.kryo.Kryo;
-
 import java.io.IOException;
 
 /** Represents the local end point of a connection.
@@ -54,8 +52,4 @@ public interface EndPoint extends Runnable {
 	/** Returns the last thread that called {@link #update(int)} for this end point. This can be useful to detect when long running
 	 * code will be run on the update thread. */
 	public Thread getUpdateThread();
-
-	/** Gets the Kryo instance that will be used to serialize and deserialize objects. This is only valid if
-	 * {@link KryoSerialization} is being used, which is the default. */
-	public Kryo getKryo();
 }

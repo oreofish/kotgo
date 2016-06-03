@@ -19,8 +19,8 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.minlog.Log;
-import com.esotericsoftware.minlog.Log.Logger;
+import com.meibug.tunet.util.Log;
+import com.meibug.tunet.util.Log.Logger;
 import com.meibug.tunet.EndPoint;
 
 import junit.framework.TestCase;

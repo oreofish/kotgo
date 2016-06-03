@@ -28,11 +28,11 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import static com.esotericsoftware.minlog.Log.*;
-import static com.esotericsoftware.minlog.Log.DEBUG;
-import static com.esotericsoftware.minlog.Log.TRACE;
-import static com.esotericsoftware.minlog.Log.debug;
-import static com.esotericsoftware.minlog.Log.trace;
+import static com.meibug.tunet.util.Log.*;
+import static com.meibug.tunet.util.Log.DEBUG;
+import static com.meibug.tunet.util.Log.TRACE;
+import static com.meibug.tunet.util.Log.debug;
+import static com.meibug.tunet.util.Log.trace;
 
 /** @author Nathan Sweet <misc@n4te.com> */
 class TcpConnection {

@@ -19,8 +19,8 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.kryo.Kryo;
 import com.meibug.tunet.FrameworkMessage.Ping;
+import com.meibug.tunet.util.Log;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -29,15 +29,15 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 
-import static com.esotericsoftware.minlog.Log.*;
-import static com.esotericsoftware.minlog.Log.DEBUG;
-import static com.esotericsoftware.minlog.Log.ERROR;
-import static com.esotericsoftware.minlog.Log.INFO;
-import static com.esotericsoftware.minlog.Log.TRACE;
-import static com.esotericsoftware.minlog.Log.debug;
-import static com.esotericsoftware.minlog.Log.error;
-import static com.esotericsoftware.minlog.Log.info;
-import static com.esotericsoftware.minlog.Log.trace;
+import static com.meibug.tunet.util.Log.*;
+import static com.meibug.tunet.util.Log.DEBUG;
+import static com.meibug.tunet.util.Log.ERROR;
+import static com.meibug.tunet.util.Log.INFO;
+import static com.meibug.tunet.util.Log.TRACE;
+import static com.meibug.tunet.util.Log.debug;
+import static com.meibug.tunet.util.Log.error;
+import static com.meibug.tunet.util.Log.info;
+import static com.meibug.tunet.util.Log.trace;
 
 // BOZO - Layer to handle handshake state.
 
@@ -94,7 +94,7 @@ public class Connection {
 		try {
 			int length = tcp.send(this, object);
 			if (length == 0) {
-				if (TRACE) trace("kryonet", this + " TCP had nothing to send.");
+				if (TRACE) Log.trace("kryonet", this + " TCP had nothing to send.");
 			} else if (DEBUG) {
 				String objectString = object == null ? "null" : object.getClass().getSimpleName();
 				if (!(object instanceof FrameworkMessage)) {

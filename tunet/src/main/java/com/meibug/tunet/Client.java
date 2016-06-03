@@ -19,7 +19,6 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.kryo.Kryo;
 import com.meibug.tunet.FrameworkMessage.DiscoverHost;
 import com.meibug.tunet.FrameworkMessage.RegisterTCP;
 import com.meibug.tunet.FrameworkMessage.RegisterUDP;
@@ -42,15 +41,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.esotericsoftware.minlog.Log.*;
-import static com.esotericsoftware.minlog.Log.DEBUG;
-import static com.esotericsoftware.minlog.Log.ERROR;
-import static com.esotericsoftware.minlog.Log.INFO;
-import static com.esotericsoftware.minlog.Log.TRACE;
-import static com.esotericsoftware.minlog.Log.debug;
-import static com.esotericsoftware.minlog.Log.error;
-import static com.esotericsoftware.minlog.Log.info;
-import static com.esotericsoftware.minlog.Log.trace;
+import static com.meibug.tunet.util.Log.*;
+import static com.meibug.tunet.util.Log.DEBUG;
+import static com.meibug.tunet.util.Log.ERROR;
+import static com.meibug.tunet.util.Log.INFO;
+import static com.meibug.tunet.util.Log.TRACE;
+import static com.meibug.tunet.util.Log.debug;
+import static com.meibug.tunet.util.Log.error;
+import static com.meibug.tunet.util.Log.info;
+import static com.meibug.tunet.util.Log.trace;
 
 /** Represents a TCP and optionally a UDP connection to a {@link Server}.
  * @author Nathan Sweet <misc@n4te.com> */
@@ -99,7 +98,7 @@ public class Client extends Connection implements EndPoint {
 	 *           <p>
 	 *           The object buffers should be sized at least as large as the largest object that will be sent or received. */
 	public Client (int writeBufferSize, int objectBufferSize) {
-		this(writeBufferSize, objectBufferSize, new KryoSerialization());
+		this(writeBufferSize, objectBufferSize, new JsonSerialization());
 	}
 
 	public Client (int writeBufferSize, int objectBufferSize, Serialization serialization) {
@@ -125,10 +124,6 @@ public class Client extends Connection implements EndPoint {
 
 	public Serialization getSerialization () {
 		return serialization;
-	}
-
-	public Kryo getKryo () {
-		return ((KryoSerialization)serialization).getKryo();
 	}
 
 	/** Opens a TCP only client.
@@ -498,7 +493,7 @@ public class Client extends Connection implements EndPoint {
 				return null;
 			}
 			if (INFO) info("kryonet", "Discovered server: " + packet.getAddress());
-			discoveryHandler.onDiscoveredHost(packet, getKryo());
+			discoveryHandler.onDiscoveredHost(packet, getSerialization());
 			return packet.getAddress();
 		} catch (IOException ex) {
 			if (ERROR) error("kryonet", "Host discovery failed.", ex);
@@ -528,7 +523,7 @@ public class Client extends Connection implements EndPoint {
 					return hosts;
 				}
 				if (INFO) info("kryonet", "Discovered server: " + packet.getAddress());
-				discoveryHandler.onDiscoveredHost(packet, getKryo());
+				discoveryHandler.onDiscoveredHost(packet, getSerialization());
 				hosts.add(packet.getAddress());
 			}
 		} catch (IOException ex) {

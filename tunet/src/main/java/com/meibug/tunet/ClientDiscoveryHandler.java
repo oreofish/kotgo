@@ -19,9 +19,6 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-
 import java.net.DatagramPacket;
 
 public interface ClientDiscoveryHandler {
@@ -38,7 +35,7 @@ public interface ClientDiscoveryHandler {
 		}
 
 		@Override
-		public void onDiscoveredHost(DatagramPacket datagramPacket, Kryo kryo) {
+		public void onDiscoveredHost(DatagramPacket datagramPacket, Serialization serialization) {
 			//
 		}
 
@@ -65,10 +62,10 @@ public interface ClientDiscoveryHandler {
 	 *            the same {@link DatagramPacket} from
 	 *            {@link #onRequestNewDatagramPacket()}, after being filled with
 	 *            the incoming packet data.
-	 * @param kryo
-	 *            the {@link Kryo} instance
+	 * @param serialization
+	 *            the {@link serialization} instance
 	 */
-	public void onDiscoveredHost(DatagramPacket datagramPacket, Kryo kryo);
+	public void onDiscoveredHost(DatagramPacket datagramPacket, Serialization serialization);
 
 	/**
 	 * Called right before the {@link Client#discoverHost(int, int)} or
