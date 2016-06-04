@@ -26,7 +26,9 @@ public class ReuseTest extends KryoNetTestCase {
 	public void testPingPong () throws IOException {
 		final AtomicInteger stringCount = new AtomicInteger(0);
 
-		final Server server = new Server();
+		String p = "";
+		Serialization s = new JsonSerialization(p);
+		final Server server = new Server(s);
 		startEndPoint(server);
 		server.addListener(new Listener() {
 			public void connected (Connection connection) {
@@ -44,7 +46,7 @@ public class ReuseTest extends KryoNetTestCase {
 
 		// ----
 
-		final Client client = new Client();
+		final Client client = new Client(s);
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			public void connected (Connection connection) {

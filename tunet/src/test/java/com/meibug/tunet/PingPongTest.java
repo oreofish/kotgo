@@ -19,8 +19,6 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.kryo.Kryo;
-
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -29,14 +27,15 @@ public class PingPongTest extends KryoNetTestCase {
 
 	public void testPingPong () throws IOException {
 		fail = null;
+		Data p = new Data();
+		Serialization s = new JsonSerialization(p);
 
 		final Data dataTCP = new Data();
 		populateData(dataTCP, true);
 		final Data dataUDP = new Data();
 		populateData(dataUDP, false);
 
-		final Server server = new Server(16384, 8192);
-		register(server.getKryo());
+		final Server server = new Server(s, 16384, 8192);
 		startEndPoint(server);
 		server.bind(tcpPort, udpPort);
 		server.addListener(new Listener() {
@@ -67,8 +66,7 @@ public class PingPongTest extends KryoNetTestCase {
 
 		// ----
 
-		final Client client = new Client(16384, 8192);
-		register(client.getKryo());
+		final Client client = new Client(s, 16384, 8192);
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			public void received (Connection connection, Object object) {
@@ -124,27 +122,6 @@ public class PingPongTest extends KryoNetTestCase {
 		data.Bytes = new Byte[] {-123, 123, -1, 0, 1, Byte.MAX_VALUE, Byte.MIN_VALUE};
 		data.Chars = new Character[] {32345, 12345, 0, 1, 63, Character.MAX_VALUE, Character.MIN_VALUE};
 		data.Booleans = new Boolean[] {true, false};
-	}
-
-	private void register (Kryo kryo) {
-		kryo.register(String[].class);
-		kryo.register(int[].class);
-		kryo.register(short[].class);
-		kryo.register(float[].class);
-		kryo.register(double[].class);
-		kryo.register(long[].class);
-		kryo.register(byte[].class);
-		kryo.register(char[].class);
-		kryo.register(boolean[].class);
-		kryo.register(Integer[].class);
-		kryo.register(Short[].class);
-		kryo.register(Float[].class);
-		kryo.register(Double[].class);
-		kryo.register(Long[].class);
-		kryo.register(Byte[].class);
-		kryo.register(Character[].class);
-		kryo.register(Boolean[].class);
-		kryo.register(Data.class);
 	}
 
 	static public class Data {

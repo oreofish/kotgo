@@ -30,14 +30,16 @@ public class KryoNetBufferUnderflowTest {
 		final int objectBufferSize = 2048;
 		final AtomicBoolean received = new AtomicBoolean();
 
+		String p = "";
+		Serialization s = new JsonSerialization(p);
 		// Creating server
-		final Server server = new Server(writeBufferSize, objectBufferSize);
+		final Server server = new Server(s, writeBufferSize, objectBufferSize);
 		server.bind(port);
 		server.start();
 		System.out.println("Server listening on port " + port);
 
 		// Creating client
-		final Client client = new Client(writeBufferSize, objectBufferSize);
+		final Client client = new Client(s, writeBufferSize, objectBufferSize);
 		client.start();
 		client.addListener(new Listener() {
 			@Override

@@ -17,41 +17,48 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.meibug.tunet;
+package com.meibug.tunet
 
-import com.meibug.tunet.FrameworkMessage.Ping;
-import com.meibug.tunet.util.Log;
+import com.google.gson.Gson
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException
+import java.nio.ByteBuffer
 
-public class PingTest extends KryoNetTestCase {
-	public void testPing () throws IOException {
-		Ping p = new Ping();
-		Serialization s = new JsonSerialization(p);
-		final Server server = new Server(s);
-		Log.set(Log.LEVEL_TRACE);
-		startEndPoint(server);
-		server.bind(tcpPort);
+import com.meibug.tunet.util.Log.INFO
+import com.meibug.tunet.util.Log.info
 
-		// ----
+class RawSerialization (val raw: Any): Serialization {
+    private var logging = true
+    private var prettyPrint = true
+    private val logBuffer = byteArrayOf()
 
-		final Client client = new Client(s);
-		startEndPoint(client);
-		client.addListener(new Listener() {
-			public void connected (Connection connection) {
-				client.updateReturnTripTime();
-			}
+    fun setLogging(logging: Boolean, prettyPrint: Boolean) {
+        this.logging = logging
+        this.prettyPrint = prettyPrint
+    }
 
-			public void received (Connection connection, Object object) {
-				if (object instanceof Ping) {
-					Ping ping = (Ping)object;
-					if (ping.isReply) System.out.println("Ping: " + connection.getReturnTripTime());
-					client.updateReturnTripTime();
-				}
-			}
-		});
-		client.connect(5000, host, tcpPort);
+    override fun write(connection: Connection, buffer: ByteBuffer, obj: Any) {
+        // FIXME: check instanceOf
+        buffer.put((obj as Raw).toRaw())
+        if (INFO && logging) {
+            val message = obj.toString()
+            info("Wrote: " + message)
+        }
+    }
 
-		waitForThreads(5000);
-	}
+    override fun read(connection: Connection, buffer: ByteBuffer): Any {
+        val t = raw as Raw;
+        return t.fromRaw(buffer)
+    }
+
+    override fun writeLength(buffer: ByteBuffer, length: Int) {
+        buffer.putInt(length)
+    }
+
+    override fun readLength(buffer: ByteBuffer): Int {
+        return buffer.int
+    }
+
+    override val lengthLength: Int
+        get() = 4
 }

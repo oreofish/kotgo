@@ -17,22 +17,23 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.meibug.tunet;
+package com.meibug.tunet
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
-/** Controls how objects are transmitted over the network. */
-public interface Serialization {
-	/** @param connection May be null. */
-	public void write(Connection connection, ByteBuffer buffer, Object object);
+/** Controls how objects are transmitted over the network.  */
+interface Serialization {
+    /** @param connection May be null.
+     */
+    fun write(connection: Connection, buffer: ByteBuffer, obj: Any)
 
-	public Object read(Connection connection, ByteBuffer buffer);
+    fun read(connection: Connection, buffer: ByteBuffer): Any
 
-	/** The fixed number of bytes that will be written by {@link #writeLength(ByteBuffer, int)} and read by
-	 * {@link #readLength(ByteBuffer)}. */
-	public int getLengthLength();
+    /** The fixed number of bytes that will be written by [.writeLength] and read by
+     * [.readLength].  */
+    val lengthLength: Int
 
-	public void writeLength(ByteBuffer buffer, int length);
+    fun writeLength(buffer: ByteBuffer, length: Int)
 
-	public int readLength(ByteBuffer buffer);
+    fun readLength(buffer: ByteBuffer): Int
 }

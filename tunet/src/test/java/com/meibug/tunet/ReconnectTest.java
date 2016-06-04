@@ -28,7 +28,9 @@ public class ReconnectTest extends KryoNetTestCase {
 	public void testReconnect () throws IOException {
 		final Timer timer = new Timer();
 
-		final Server server = new Server();
+		String p = "";
+		Serialization s = new JsonSerialization(p);
+		final Server server = new Server(s);
 		startEndPoint(server);
 		server.bind(tcpPort);
 		server.addListener(new Listener() {
@@ -45,7 +47,7 @@ public class ReconnectTest extends KryoNetTestCase {
 		// ----
 
 		final AtomicInteger reconnetCount = new AtomicInteger();
-		final Client client = new Client();
+		final Client client = new Client(s);
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			public void disconnected (Connection connection) {

@@ -33,7 +33,9 @@ public class JsonTest extends KryoNetTestCase {
 		final Data dataUDP = new Data();
 		populateData(dataUDP, false);
 
-		final Server server = new Server(16384, 8192, new JsonSerialization());
+		Data p = new Data();
+		Serialization s = new JsonSerialization(p);
+		final Server server = new Server(s, 16384, 8192);
 		startEndPoint(server);
 		server.bind(tcpPort, udpPort);
 		server.addListener(new Listener() {
@@ -63,8 +65,7 @@ public class JsonTest extends KryoNetTestCase {
 		});
 
 		// ----
-
-		final Client client = new Client(16384, 8192, new JsonSerialization());
+		final Client client = new Client(s, 16384, 8192);
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			public void received (Connection connection, Object object) {
