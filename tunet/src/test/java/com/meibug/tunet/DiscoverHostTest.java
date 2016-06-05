@@ -19,13 +19,8 @@
 
 package com.meibug.tunet;
 
-import com.meibug.tunet.Client;
-import com.meibug.tunet.ClientDiscoveryHandler;
-import com.meibug.tunet.Connection;
-import com.meibug.tunet.Listener;
-import com.meibug.tunet.Serialization;
-import com.meibug.tunet.Server;
-import com.meibug.tunet.ServerDiscoveryHandler;
+
+import com.meibug.tunet.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,9 +29,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-
-import static com.meibug.tunet.util.Log.*;
-import static com.meibug.tunet.util.Log.info;
 
 public class DiscoverHostTest extends KryoNetTestCase {
 
@@ -110,12 +102,12 @@ public class DiscoverHostTest extends KryoNetTestCase {
 			public void onDiscoveredHost (DatagramPacket datagramPacket, Serialization serialization) {
 				if (input != null) {
 					DiscoveryResponsePacket packet;
-					packet = (DiscoveryResponsePacket)serialization.readClassAndObject(input);
-					info("test", "packet.id = " + packet.id);
-					info("test", "packet.gameName = " + packet.gameName);
-					info("test", "packet.playerName = " + packet.playerName);
-					info("test", "datagramPacket.getAddress() = " + datagramPacket.getAddress());
-					info("test", "datagramPacket.getPort() = " + datagramPacket.getPort());
+					packet = (DiscoveryResponsePacket)kryo.readClassAndObject(input);
+					Log.info("test", "packet.id = " + packet.id);
+					Log.info("test", "packet.gameName = " + packet.gameName);
+					Log.info("test", "packet.playerName = " + packet.playerName);
+					Log.info("test", "datagramPacket.getAddress() = " + datagramPacket.getAddress());
+					Log.info("test", "datagramPacket.getPort() = " + datagramPacket.getPort());
 					assertEquals(42, packet.id);
 					assertEquals("gameName", packet.gameName);
 					assertEquals("playerName", packet.playerName);
@@ -135,7 +127,7 @@ public class DiscoverHostTest extends KryoNetTestCase {
 		// It wouldn't be needed if the real server was using UDP.
 		final Server broadcastServer = new Server();
 
-		// broadcastServer.getSerialization().register(DiscoveryResponsePacket.class);
+		broadcastServer.getKryo().register(DiscoveryResponsePacket.class);
 		broadcastServer.setDiscoveryHandler(serverDiscoveryHandler);
 
 		startEndPoint(broadcastServer);
@@ -155,7 +147,7 @@ public class DiscoverHostTest extends KryoNetTestCase {
 
 		Client client = new Client();
 
-		// client.getSerialization().register(DiscoveryResponsePacket.class);
+		client.getKryo().register(DiscoveryResponsePacket.class);
 		client.setDiscoveryHandler(clientDiscoveryHandler);
 
 		InetAddress host = client.discoverHost(udpPort, 2000);

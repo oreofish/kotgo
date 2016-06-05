@@ -33,7 +33,6 @@ public class MultipleThreadTest extends KryoNetTestCase {
 		final int clients = 3;
 
 		final Server server = new Server(16384, 8192);
-		server.getKryo().register(String[].class);
 		startEndPoint(server);
 		server.bind(tcpPort, udpPort);
 		server.addListener(new Listener() {
@@ -47,7 +46,6 @@ public class MultipleThreadTest extends KryoNetTestCase {
 
 		for (int i = 0; i < clients; i++) {
 			Client client = new Client(16384, 8192);
-			client.getKryo().register(String[].class);
 			startEndPoint(client);
 			client.addListener(new Listener() {
 				int received;

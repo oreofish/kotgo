@@ -34,7 +34,7 @@ public class UnregisteredClassTest extends KryoNetTestCase {
 		final AtomicInteger receivedUDP = new AtomicInteger();
 
 		final Server server = new Server(1024 * 32, 1024 * 16);
-		server.getKryo().setRegistrationRequired(false);
+		// server.getKryo().setRegistrationRequired(false);
 		startEndPoint(server);
 		server.bind(tcpPort, udpPort);
 		server.addListener(new Listener() {
@@ -60,7 +60,7 @@ public class UnregisteredClassTest extends KryoNetTestCase {
 		// ----
 
 		final Client client = new Client(1024 * 32, 1024 * 16);
-		client.getKryo().setRegistrationRequired(false);
+		// client.getKryo().setRegistrationRequired(false);
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			public void received (Connection connection, Object object) {

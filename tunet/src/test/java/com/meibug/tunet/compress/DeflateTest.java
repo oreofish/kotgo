@@ -35,7 +35,6 @@ import java.util.ArrayList;
 public class DeflateTest extends KryoNetTestCase {
 	public void testDeflate () throws IOException {
 		final Server server = new Server();
-		register(server.getKryo());
 
 		final SomeData data = new SomeData();
 		data.text = "some text here aaaaaaaaaabbbbbbbbbbbcccccccccc";
@@ -59,7 +58,6 @@ public class DeflateTest extends KryoNetTestCase {
 		// ----
 
 		final Client client = new Client();
-		register(client.getKryo());
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			public void received (Connection connection, Object object) {
@@ -74,12 +72,6 @@ public class DeflateTest extends KryoNetTestCase {
 		client.connect(5000, host, tcpPort, udpPort);
 
 		waitForThreads();
-	}
-
-	static public void register (Kryo kryo) {
-		kryo.register(short[].class);
-		kryo.register(SomeData.class, new DeflateSerializer(new FieldSerializer(kryo, SomeData.class)));
-		kryo.register(ArrayList.class, new CollectionSerializer());
 	}
 
 	static public class SomeData {
