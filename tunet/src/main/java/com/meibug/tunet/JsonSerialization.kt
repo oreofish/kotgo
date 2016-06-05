@@ -37,7 +37,7 @@ import com.meibug.tunet.util.Log.INFO
 import com.meibug.tunet.util.Log.info
 import java.nio.charset.Charset
 
-class JsonSerialization (val raw: Any): Serialization {
+class JsonSerialization (): Serialization {
     private val gson = Gson()
     private var logging = true
     private var prettyPrint = true
@@ -49,7 +49,8 @@ class JsonSerialization (val raw: Any): Serialization {
     }
 
     override fun write(connection: Connection, buffer: ByteBuffer, obj: Any) {
-        val str = gson.toJson(obj);
+        val objClass = obj.javaClass.name
+        val str = objClass + ":" + gson.toJson(obj);
         val bytes = str.toByteArray(charset("UTF-8"));
         try {
             buffer.put(bytes)
@@ -68,9 +69,12 @@ class JsonSerialization (val raw: Any): Serialization {
         val limit = buffer.limit()
         val bytes = ByteArray(limit - position)
         buffer.get(bytes)
-        val jsonStr = String( bytes, Charset.forName("UTF-8") );
-        val rawClass = raw.javaClass;
-        return gson.fromJson(jsonStr, rawClass);
+        val str = String( bytes, Charset.forName("UTF-8") )
+        val index = str.indexOf(":")
+        val strClass = str.substring(0, index)
+        val objClass = Class.forName(strClass);
+        val jsonStr = str.substring(index + 1)
+        return gson.fromJson(jsonStr, objClass)
     }
 
     override fun writeLength(buffer: ByteBuffer, length: Int) {

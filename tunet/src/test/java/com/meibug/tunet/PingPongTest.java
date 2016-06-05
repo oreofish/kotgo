@@ -27,15 +27,13 @@ public class PingPongTest extends KryoNetTestCase {
 
 	public void testPingPong () throws IOException {
 		fail = null;
-		Data p = new Data();
-		Serialization s = new JsonSerialization(p);
 
 		final Data dataTCP = new Data();
 		populateData(dataTCP, true);
 		final Data dataUDP = new Data();
 		populateData(dataUDP, false);
 
-		final Server server = new Server(s, 16384, 8192);
+		final Server server = new Server();
 		startEndPoint(server);
 		server.bind(tcpPort, udpPort);
 		server.addListener(new Listener() {
@@ -66,7 +64,7 @@ public class PingPongTest extends KryoNetTestCase {
 
 		// ----
 
-		final Client client = new Client(s, 16384, 8192);
+		final Client client = new Client();
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			public void received (Connection connection, Object object) {

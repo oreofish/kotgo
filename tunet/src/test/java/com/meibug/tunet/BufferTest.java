@@ -19,7 +19,6 @@
 
 package com.meibug.tunet;
 
-import com.esotericsoftware.kryo.Kryo;
 import com.meibug.tunet.Client;
 import com.meibug.tunet.Connection;
 import com.meibug.tunet.Listener;
@@ -39,7 +38,6 @@ public class BufferTest extends KryoNetTestCase {
 
 		Server server = new Server(writeBufferSize, objectBufferSize);
 		startEndPoint(server);
-		register(server.getKryo());
 		server.bind(tcpPort);
 
 		server.addListener(new Listener() {
@@ -65,7 +63,6 @@ public class BufferTest extends KryoNetTestCase {
 
 		final Client client = new Client(writeBufferSize, objectBufferSize);
 		startEndPoint(client);
-		register(client.getKryo());
 		client.connect(5000, host, tcpPort);
 
 		client.addListener(new Listener() {
@@ -93,11 +90,6 @@ public class BufferTest extends KryoNetTestCase {
 		System.out.println("Client has queued " + messageCount + " messages.");
 
 		waitForThreads(5000);
-	}
-
-	private void register (Kryo kryo) {
-		kryo.register(byte[].class);
-		kryo.register(LargeMessage.class);
 	}
 
 	public static class LargeMessage {

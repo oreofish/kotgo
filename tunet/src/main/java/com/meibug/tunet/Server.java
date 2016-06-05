@@ -92,8 +92,8 @@ public class Server implements EndPoint {
 	};
 
 	/** Creates a Server with a write buffer size of 16384 and an object buffer size of 2048. */
-	public Server (Serialization serialization) {
-		this(serialization, 16384, 2048);
+	public Server () {
+		this(16384, 2048);
 	}
 
 	/** @param writeBufferSize One buffer of this size is allocated for each connected client. Objects are serialized to the write
@@ -110,7 +110,11 @@ public class Server implements EndPoint {
 	 *           deserialized.
 	 *           <p>
 	 *           The object buffers should be sized at least as large as the largest object that will be sent or received. */
-	public Server (Serialization serialization, int writeBufferSize, int objectBufferSize) {
+	public Server (int writeBufferSize, int objectBufferSize) {
+		this(writeBufferSize, objectBufferSize, new JsonSerialization());
+	}
+
+	public Server (int writeBufferSize, int objectBufferSize, Serialization serialization) {
 		this.writeBufferSize = writeBufferSize;
 		this.objectBufferSize = objectBufferSize;
 

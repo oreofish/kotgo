@@ -26,16 +26,14 @@ import java.io.IOException;
 
 public class PingTest extends KryoNetTestCase {
 	public void testPing () throws IOException {
-		Ping p = new Ping();
-		Serialization s = new JsonSerialization(p);
-		final Server server = new Server(s);
+		final Server server = new Server();
 		Log.set(Log.LEVEL_TRACE);
 		startEndPoint(server);
 		server.bind(tcpPort);
 
 		// ----
 
-		final Client client = new Client(s);
+		final Client client = new Client();
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			public void connected (Connection connection) {

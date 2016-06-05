@@ -79,8 +79,8 @@ public class Client extends Connection implements EndPoint {
 	private ClientDiscoveryHandler discoveryHandler;
 
 	/** Creates a Client with a write buffer size of 8192 and an object buffer size of 2048. */
-	public Client (Serialization serialization) {
-		this(serialization, 8192, 2048);
+	public Client () {
+		this(8192, 2048);
 	}
 
 	/** @param writeBufferSize One buffer of this size is allocated. Objects are serialized to the write buffer where the bytes are
@@ -97,7 +97,11 @@ public class Client extends Connection implements EndPoint {
 	 *           deserialized.
 	 *           <p>
 	 *           The object buffers should be sized at least as large as the largest object that will be sent or received. */
-	public Client (Serialization serialization, int writeBufferSize, int objectBufferSize) {
+	public Client (int writeBufferSize, int objectBufferSize) {
+		this(writeBufferSize, objectBufferSize, new JsonSerialization());
+	}
+
+	public Client (int writeBufferSize, int objectBufferSize, Serialization serialization) {
 		super();
 		endPoint = this;
 

@@ -36,7 +36,6 @@ public class InputStreamSenderTest extends KryoNetTestCase {
 		final int largeDataSize = 12345;
 
 		final Server server = new Server(16384, 8192);
-		server.getKryo().setRegistrationRequired(false);
 		startEndPoint(server);
 		server.bind(tcpPort, udpPort);
 		server.addListener(new Listener() {
@@ -63,7 +62,6 @@ public class InputStreamSenderTest extends KryoNetTestCase {
 		// ----
 
 		final Client client = new Client(16384, 8192);
-		client.getKryo().setRegistrationRequired(false);
 		startEndPoint(client);
 		client.addListener(new Listener() {
 			int total;
