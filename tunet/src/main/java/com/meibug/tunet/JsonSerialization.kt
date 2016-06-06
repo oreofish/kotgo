@@ -64,7 +64,7 @@ class JsonSerialization (): Serialization {
         }
     }
 
-    override fun read(connection: Connection, buffer: ByteBuffer): Any {
+    override fun read(connection: Connection?, buffer: ByteBuffer): Any {
         val position = buffer.position()
         val limit = buffer.limit()
         val bytes = ByteArray(limit - position)

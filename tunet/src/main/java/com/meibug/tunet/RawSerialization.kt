@@ -46,7 +46,7 @@ class RawSerialization (val raw: Any): Serialization {
         }
     }
 
-    override fun read(connection: Connection, buffer: ByteBuffer): Any {
+    override fun read(connection: Connection?, buffer: ByteBuffer): Any {
         val t = raw as Raw;
         return t.fromRaw(buffer)
     }

@@ -27,7 +27,7 @@ interface Serialization {
      */
     fun write(connection: Connection, buffer: ByteBuffer, obj: Any)
 
-    fun read(connection: Connection, buffer: ByteBuffer): Any
+    fun read(connection: Connection?, buffer: ByteBuffer): Any
 
     /** The fixed number of bytes that will be written by [.writeLength] and read by
      * [.readLength].  */
