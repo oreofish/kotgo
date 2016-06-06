@@ -17,61 +17,39 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.meibug.tunet.compress;
+package com.meibug.tunet
 
-import com.meibug.tunet.Client;
-import com.meibug.tunet.Connection;
-import com.meibug.tunet.KryoNetTestCase;
-import com.meibug.tunet.Listener;
-import com.meibug.tunet.Server;
+import com.meibug.tunet.FrameworkMessage.Ping
+import com.meibug.tunet.util.Log
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.IOException
 
-public class DeflateTest extends KryoNetTestCase {
-	public void testDeflate () throws IOException {
-		final Server server = new Server();
+class PingTest : KryoNetTestCase() {
+    @Throws(IOException::class)
+    fun testPing() {
+        val server = Server()
+        Log.set(Log.LEVEL_TRACE)
+        startEndPoint(server)
+        server.bind(KryoNetTestCase.tcpPort)
 
-		final SomeData data = new SomeData();
-		data.text = "some text here aaaaaaaaaabbbbbbbbbbbcccccccccc";
-		data.stuff = new short[] {1, 2, 3, 4, 5, 6, 7, 8};
+        // ----
 
-		final ArrayList a = new ArrayList();
-		a.add(12);
-		a.add(null);
-		a.add(34);
+        val client = Client()
+        startEndPoint(client)
+        client.addListener(object : Listener() {
+            override fun connected(connection: Connection) {
+                client.updateReturnTripTime()
+            }
 
-		startEndPoint(server);
-		server.bind(tcpPort, udpPort);
-		server.addListener(new Listener() {
-			public void connected (Connection connection) {
-				server.sendToAllTCP(data);
-				connection.sendTCP(data);
-				connection.sendTCP(a);
-			}
-		});
+            override fun received(connection: Connection, obj: Any) {
+                if (obj is Ping) {
+                    if (obj.isReply) println("Ping: " + connection.returnTripTime)
+                    client.updateReturnTripTime()
+                }
+            }
+        })
+        client.connect(5000, host, tcpPort)
 
-		// ----
-
-		final Client client = new Client();
-		startEndPoint(client);
-		client.addListener(new Listener() {
-			public void received (Connection connection, Object object) {
-				if (object instanceof SomeData) {
-					SomeData data = (SomeData)object;
-					System.out.println(data.stuff[3]);
-				} else if (object instanceof ArrayList) {
-					stopEndPoints();
-				}
-			}
-		});
-		client.connect(5000, host, tcpPort, udpPort);
-
-		waitForThreads();
-	}
-
-	static public class SomeData {
-		public String text;
-		public short[] stuff;
-	}
+        waitForThreads(5000)
+    }
 }
