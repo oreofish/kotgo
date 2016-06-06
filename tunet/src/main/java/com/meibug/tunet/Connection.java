@@ -59,10 +59,7 @@ public class Connection {
 	volatile boolean isConnected;
 	volatile KryoNetException lastProtocolError;
 
-	protected Connection () {
-	}
-
-	void initialize (Serialization serialization, int writeBufferSize, int objectBufferSize) {
+	protected Connection (Serialization serialization, int writeBufferSize, int objectBufferSize) {
 		tcp = new TcpConnection(serialization, writeBufferSize, objectBufferSize);
 	}
 

@@ -410,8 +410,7 @@ public class Server implements EndPoint {
 	}
 
 	private void acceptOperation (SocketChannel socketChannel) {
-		Connection connection = newConnection();
-		connection.initialize(serialization, writeBufferSize, objectBufferSize);
+		Connection connection = new Connection(serialization, writeBufferSize, objectBufferSize);
 		connection.endPoint = this;
 		UdpConnection udp = this.udp;
 		if (udp != null) connection.udp = udp;
@@ -443,9 +442,11 @@ public class Server implements EndPoint {
 
 	/** Allows the connections used by the server to be subclassed. This can be useful for storage per connection without an
 	 * additional lookup. */
+/*
 	protected Connection newConnection () {
 		return new Connection();
 	}
+*/
 
 	private void addConnection (Connection connection) {
 		Connection[] newConnections = new Connection[connections.length + 1];

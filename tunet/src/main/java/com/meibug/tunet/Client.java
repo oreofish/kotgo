@@ -102,14 +102,10 @@ public class Client extends Connection implements EndPoint {
 	}
 
 	public Client (int writeBufferSize, int objectBufferSize, Serialization serialization) {
-		super();
+		super(serialization, writeBufferSize, objectBufferSize);
 		endPoint = this;
-
 		this.serialization = serialization;
-
 		this.discoveryHandler = ClientDiscoveryHandler.Companion.getDEFAULT();
-
-		initialize(serialization, writeBufferSize, objectBufferSize);
 
 		try {
 			selector = Selector.open();
