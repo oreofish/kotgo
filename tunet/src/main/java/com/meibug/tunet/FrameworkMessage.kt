@@ -17,39 +17,39 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.meibug.tunet;
+package com.meibug.tunet
 
-import java.io.IOException;
+import com.meibug.tunet.util.Log
 
-/** Represents the local end point of a connection.
- * @author Nathan Sweet <misc@n4te.com> */
-public interface EndPoint extends Runnable {
-	/** Gets the serialization instance that will be used to serialize and deserialize objects. */
-	public Serialization getSerialization();
+/** Marker interface to denote that a message is used by the Ninja framework and is generally invisible to the developer. Eg, these
+ * messages are only logged at the [Log.LEVEL_TRACE] level.
+ * @author Nathan Sweet @n4te.com>
+ */
+interface FrameworkMessage {
 
-	/** If the listener already exists, it is not added again. */
-	public void addListener(Listener listener);
+    /** Internal message to give the client the server assigned connection ID.  */
+    class RegisterTCP : FrameworkMessage {
+        var connectionID: Int = 0
+    }
 
-	public void removeListener(Listener listener);
+    /** Internal message to give the server the client's UDP port.  */
+    class RegisterUDP : FrameworkMessage {
+        var connectionID: Int = 0
+    }
 
-	/** Continually updates this end point until {@link #stop()} is called. */
-	public void run();
+    /** Internal message to keep connections alive.  */
+    class KeepAlive : FrameworkMessage
 
-	/** Starts a new thread that calls {@link #run()}. */
-	public void start();
+    /** Internal message to discover running servers.  */
+    class DiscoverHost : FrameworkMessage
 
-	/** Closes this end point and causes {@link #run()} to return. */
-	public void stop();
+    /** Internal message to determine round trip time.  */
+    class Ping : FrameworkMessage {
+        var id: Int = 0
+        var isReply: Boolean = false
+    }
 
-	/** @see Client
-	 * @see Server */
-	public void close();
-
-	/** @see Client#update(int)
-	 * @see Server#update(int) */
-	public void update(int timeout) throws IOException;
-
-	/** Returns the last thread that called {@link #update(int)} for this end point. This can be useful to detect when long running
-	 * code will be run on the update thread. */
-	public Thread getUpdateThread();
+    companion object {
+        val keepAlive: FrameworkMessage.KeepAlive = KeepAlive()
+    }
 }

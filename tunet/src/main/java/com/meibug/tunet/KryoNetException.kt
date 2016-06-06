@@ -17,37 +17,18 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.meibug.tunet;
+package com.meibug.tunet
 
-import com.meibug.tunet.util.Log;
+class KryoNetException : RuntimeException {
+    constructor() : super() {
+    }
 
-/** Marker interface to denote that a message is used by the Ninja framework and is generally invisible to the developer. Eg, these
- * messages are only logged at the {@link Log#LEVEL_TRACE} level.
- * @author Nathan Sweet <misc@n4te.com> */
-public interface FrameworkMessage {
-	static final FrameworkMessage.KeepAlive keepAlive = new KeepAlive();
+    constructor(message: String, cause: Throwable) : super(message, cause) {
+    }
 
-	/** Internal message to give the client the server assigned connection ID. */
-	static public class RegisterTCP implements FrameworkMessage {
-		public int connectionID;
-	}
+    constructor(message: String) : super(message) {
+    }
 
-	/** Internal message to give the server the client's UDP port. */
-	static public class RegisterUDP implements FrameworkMessage {
-		public int connectionID;
-	}
-
-	/** Internal message to keep connections alive. */
-	static public class KeepAlive implements FrameworkMessage {
-	}
-
-	/** Internal message to discover running servers. */
-	static public class DiscoverHost implements FrameworkMessage {
-	}
-
-	/** Internal message to determine round trip time. */
-	static public class Ping implements FrameworkMessage {
-		public int id;
-		public boolean isReply;
-	}
+    constructor(cause: Throwable) : super(cause) {
+    }
 }

@@ -17,22 +17,44 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.meibug.tunet;
+package com.meibug.tunet
 
-public class KryoNetException extends RuntimeException {
-	public KryoNetException () {
-		super();
-	}
+import java.io.IOException
 
-	public KryoNetException (String message, Throwable cause) {
-		super(message, cause);
-	}
+/** Represents the local end point of a connection.
+ * @author Nathan Sweet @n4te.com>
+ */
+interface EndPoint : Runnable {
+    /** Gets the serialization instance that will be used to serialize and deserialize objects.  */
+    val serialization: Serialization
 
-	public KryoNetException (String message) {
-		super(message);
-	}
+    /** If the listener already exists, it is not added again.  */
+    fun addListener(listener: Listener)
 
-	public KryoNetException (Throwable cause) {
-		super(cause);
-	}
+    fun removeListener(listener: Listener)
+
+    /** Continually updates this end point until [.stop] is called.  */
+    override fun run()
+
+    /** Starts a new thread that calls [.run].  */
+    fun start()
+
+    /** Closes this end point and causes [.run] to return.  */
+    fun stop()
+
+    /** @see Client
+
+     * @see Server
+     */
+    fun close()
+
+    /** @see Client.update
+     * @see Server.update
+     */
+    @Throws(IOException::class)
+    fun update(timeout: Int)
+
+    /** Returns the last thread that called [.update] for this end point. This can be useful to detect when long running
+     * code will be run on the update thread.  */
+    val updateThread: Thread
 }

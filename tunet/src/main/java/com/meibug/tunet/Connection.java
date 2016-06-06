@@ -171,7 +171,7 @@ public class Connection {
 	 * {@link Ping#isReply isReply} set to true, the new return trip time is available. */
 	public void updateReturnTripTime () {
 		Ping ping = new Ping();
-		ping.id = lastPingID++;
+		ping.setId(lastPingID++);
 		lastPingSendTime = System.currentTimeMillis();
 		sendTCP(ping);
 	}
@@ -267,13 +267,13 @@ public class Connection {
 	void notifyReceived (Object object) {
 		if (object instanceof Ping) {
 			Ping ping = (Ping)object;
-			if (ping.isReply) {
-				if (ping.id == lastPingID - 1) {
+			if (ping.isReply()) {
+				if (ping.getId() == lastPingID - 1) {
 					returnTripTime = (int)(System.currentTimeMillis() - lastPingSendTime);
 					if (TRACE) trace("kryonet", this + " return trip time: " + returnTripTime);
 				}
 			} else {
-				ping.isReply = true;
+				ping.setReply(true);
 				sendTCP(ping);
 			}
 		}

@@ -311,7 +311,7 @@ public class Server implements EndPoint {
 						if (object instanceof FrameworkMessage) {
 							if (object instanceof RegisterUDP) {
 								// Store the fromAddress on the connection and reply over TCP with a RegisterUDP to indicate success.
-								int fromConnectionID = ((RegisterUDP)object).connectionID;
+								int fromConnectionID = ((RegisterUDP)object).getConnectionID();
 								Connection connection = pendingConnections.remove(fromConnectionID);
 								if (connection != null) {
 									if (connection.udpRemoteAddress != null) continue outer;
@@ -369,7 +369,7 @@ public class Server implements EndPoint {
 				if (DEBUG) debug("kryonet", connection + " timed out.");
 				connection.close();
 			} else {
-				if (connection.tcp.needsKeepAlive(time)) connection.sendTCP(FrameworkMessage.keepAlive);
+				if (connection.tcp.needsKeepAlive(time)) connection.sendTCP(FrameworkMessage.Companion.getKeepAlive());
 			}
 			if (connection.isIdle()) connection.notifyIdle();
 		}
@@ -380,7 +380,7 @@ public class Server implements EndPoint {
 		Connection[] connections = this.connections;
 		for (int i = 0, n = connections.length; i < n; i++) {
 			Connection connection = connections[i];
-			if (connection.tcp.needsKeepAlive(time)) connection.sendTCP(FrameworkMessage.keepAlive);
+			if (connection.tcp.needsKeepAlive(time)) connection.sendTCP(FrameworkMessage.Companion.getKeepAlive());
 		}
 	}
 
@@ -431,7 +431,7 @@ public class Server implements EndPoint {
 				pendingConnections.put(id, connection);
 
 			RegisterTCP registerConnection = new RegisterTCP();
-			registerConnection.connectionID = id;
+			registerConnection.setConnectionID(id);
 			connection.sendTCP(registerConnection);
 
 			if (udp == null) connection.notifyConnected();

@@ -107,7 +107,7 @@ public class Client extends Connection implements EndPoint {
 
 		this.serialization = serialization;
 
-		this.discoveryHandler = ClientDiscoveryHandler.DEFAULT;
+		this.discoveryHandler = ClientDiscoveryHandler.Companion.getDEFAULT();
 
 		initialize(serialization, writeBufferSize, objectBufferSize);
 
@@ -207,7 +207,7 @@ public class Client extends Connection implements EndPoint {
 				synchronized (udpRegistrationLock) {
 					while (!udpRegistered && System.currentTimeMillis() < endTime) {
 						RegisterUDP registerUDP = new RegisterUDP();
-						registerUDP.connectionID = id;
+						registerUDP.setConnectionID(id);
 						udp.send(this, registerUDP, udpAddress);
 						try {
 							udpRegistrationLock.wait(100);
@@ -281,7 +281,7 @@ public class Client extends Connection implements EndPoint {
 									if (object == null) break;
 									if (!tcpRegistered) {
 										if (object instanceof RegisterTCP) {
-											id = ((RegisterTCP)object).connectionID;
+											id = ((RegisterTCP)object).getConnectionID();
 											synchronized (tcpRegistrationLock) {
 												tcpRegistered = true;
 												tcpRegistrationLock.notifyAll();
@@ -351,8 +351,8 @@ public class Client extends Connection implements EndPoint {
 	void keepAlive () {
 		if (!isConnected) return;
 		long time = System.currentTimeMillis();
-		if (tcp.needsKeepAlive(time)) sendTCP(FrameworkMessage.keepAlive);
-		if (udp != null && udpRegistered && udp.needsKeepAlive(time)) sendUDP(FrameworkMessage.keepAlive);
+		if (tcp.needsKeepAlive(time)) sendTCP(FrameworkMessage.Companion.getKeepAlive());
+		if (udp != null && udpRegistered && udp.needsKeepAlive(time)) sendUDP(FrameworkMessage.Companion.getKeepAlive());
 	}
 
 	public void run () {
