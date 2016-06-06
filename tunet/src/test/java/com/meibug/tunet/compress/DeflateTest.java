@@ -19,10 +19,6 @@
 
 package com.meibug.tunet.compress;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.serializers.CollectionSerializer;
-import com.esotericsoftware.kryo.serializers.DeflateSerializer;
-import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.meibug.tunet.Client;
 import com.meibug.tunet.Connection;
 import com.meibug.tunet.KryoNetTestCase;

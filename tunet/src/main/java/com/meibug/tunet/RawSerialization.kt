@@ -37,7 +37,7 @@ class RawSerialization (val raw: Any): Serialization {
         this.prettyPrint = prettyPrint
     }
 
-    override fun write(connection: Connection, buffer: ByteBuffer, obj: Any) {
+    override fun write(connection: Connection?, buffer: ByteBuffer, obj: Any) {
         // FIXME: check instanceOf
         buffer.put((obj as Raw).toRaw())
         if (INFO && logging) {

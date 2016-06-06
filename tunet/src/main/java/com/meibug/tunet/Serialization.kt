@@ -25,7 +25,7 @@ import java.nio.ByteBuffer
 interface Serialization {
     /** @param connection May be null.
      */
-    fun write(connection: Connection, buffer: ByteBuffer, obj: Any)
+    fun write(connection: Connection?, buffer: ByteBuffer, obj: Any)
 
     fun read(connection: Connection?, buffer: ByteBuffer): Any
 

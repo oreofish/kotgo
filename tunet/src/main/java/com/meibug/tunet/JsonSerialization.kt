@@ -27,6 +27,7 @@ import com.meibug.tunet.FrameworkMessage.KeepAlive
 import com.meibug.tunet.FrameworkMessage.Ping
 import com.meibug.tunet.FrameworkMessage.RegisterTCP
 import com.meibug.tunet.FrameworkMessage.RegisterUDP
+import com.meibug.tunet.util.Log
 
 import java.io.OutputStreamWriter
 import java.io.UnsupportedEncodingException
@@ -48,7 +49,7 @@ class JsonSerialization (): Serialization {
         this.prettyPrint = prettyPrint
     }
 
-    override fun write(connection: Connection, buffer: ByteBuffer, obj: Any) {
+    override fun write(connection: Connection?, buffer: ByteBuffer, obj: Any) {
         val objClass = obj.javaClass.name
         val str = objClass + ":" + gson.toJson(obj);
         val bytes = str.toByteArray(charset("UTF-8"));

@@ -100,9 +100,11 @@ public class DiscoverHostTest extends KryoNetTestCase {
 
 			@Override
 			public void onDiscoveredHost (DatagramPacket datagramPacket, Serialization serialization) {
-				if (input != null) {
+				if (input != null && input.buffer != null) {
 					DiscoveryResponsePacket packet;
-					packet = (DiscoveryResponsePacket)kryo.readClassAndObject(input);
+					// packet = (DiscoveryResponsePacket)kryo.readClassAndObject(input);
+					ByteBuffer buf = ByteBuffer.wrap(input.buffer);
+					packet = (DiscoveryResponsePacket) serialization.read(null, buf);
 					Log.info("test", "packet.id = " + packet.id);
 					Log.info("test", "packet.gameName = " + packet.gameName);
 					Log.info("test", "packet.playerName = " + packet.playerName);
@@ -126,8 +128,6 @@ public class DiscoverHostTest extends KryoNetTestCase {
 		// This server exists solely to reply to Client#discoverHost.
 		// It wouldn't be needed if the real server was using UDP.
 		final Server broadcastServer = new Server();
-
-		broadcastServer.getKryo().register(DiscoveryResponsePacket.class);
 		broadcastServer.setDiscoveryHandler(serverDiscoveryHandler);
 
 		startEndPoint(broadcastServer);
@@ -146,8 +146,6 @@ public class DiscoverHostTest extends KryoNetTestCase {
 		// ----
 
 		Client client = new Client();
-
-		client.getKryo().register(DiscoveryResponsePacket.class);
 		client.setDiscoveryHandler(clientDiscoveryHandler);
 
 		InetAddress host = client.discoverHost(udpPort, 2000);
