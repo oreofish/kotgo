@@ -119,7 +119,7 @@ public class Connection {
 	public int sendUDP (Object object) {
 		if (object == null) throw new IllegalArgumentException("object cannot be null.");
 		SocketAddress address = udpRemoteAddress;
-		if (address == null && udp != null) address = udp.connectedAddress;
+		if (address == null && udp != null) address = udp.getConnectedAddress();
 		if (address == null && isConnected) throw new IllegalStateException("Connection is not connected via UDP.");
 
 		try {
@@ -155,7 +155,7 @@ public class Connection {
 		boolean wasConnected = isConnected;
 		isConnected = false;
 		tcp.close();
-		if (udp != null && udp.connectedAddress != null) udp.close();
+		if (udp != null && udp.getConnectedAddress() != null) udp.close();
 		if (wasConnected) {
 			notifyDisconnected();
 			if (INFO) info("kryonet", this + " disconnected.");
@@ -184,7 +184,7 @@ public class Connection {
 	 * ). Also, some network hardware will close a TCP connection that ceases to transmit for a period of time (typically 1+
 	 * minutes). Set to zero to disable. Defaults to 8000. */
 	public void setKeepAliveTCP (int keepAliveMillis) {
-		tcp.keepAliveMillis = keepAliveMillis;
+		tcp.setKeepAliveMillis(keepAliveMillis);
 	}
 
 	/** If the specified amount of time passes without receiving an object over TCP, the connection is considered closed. When a TCP
@@ -194,7 +194,7 @@ public class Connection {
 	 * end of the connection will be constantly sending objects, and setting the timeout higher than the keep alive allows for
 	 * network latency. Set to zero to disable. Defaults to 12000. */
 	public void setTimeout (int timeoutMillis) {
-		tcp.timeoutMillis = timeoutMillis;
+		tcp.setTimeoutMillis(timeoutMillis);
 	}
 
 	/** If the listener already exists, it is not added again. */
@@ -233,9 +233,9 @@ public class Connection {
 
 	void notifyConnected () {
 		if (INFO) {
-			SocketChannel socketChannel = tcp.socketChannel;
+			SocketChannel socketChannel = tcp.getSocketChannel();
 			if (socketChannel != null) {
-				Socket socket = tcp.socketChannel.socket();
+				Socket socket = tcp.getSocketChannel().socket();
 				if (socket != null) {
 					InetSocketAddress remoteSocketAddress = (InetSocketAddress)socket.getRemoteSocketAddress();
 					if (remoteSocketAddress != null) info("kryonet", this + " connected: " + remoteSocketAddress.getAddress());
@@ -286,9 +286,9 @@ public class Connection {
 
 	/** Returns the IP address and port of the remote end of the TCP connection, or null if this connection is not connected. */
 	public InetSocketAddress getRemoteAddressTCP () {
-		SocketChannel socketChannel = tcp.socketChannel;
+		SocketChannel socketChannel = tcp.getSocketChannel();
 		if (socketChannel != null) {
-			Socket socket = tcp.socketChannel.socket();
+			Socket socket = tcp.getSocketChannel().socket();
 			if (socket != null) {
 				return (InetSocketAddress)socket.getRemoteSocketAddress();
 			}
@@ -298,7 +298,7 @@ public class Connection {
 
 	/** Returns the IP address and port of the remote end of the UDP connection, or null if this connection is not connected. */
 	public InetSocketAddress getRemoteAddressUDP () {
-		InetSocketAddress connectedAddress = udp.connectedAddress;
+		InetSocketAddress connectedAddress = udp.getConnectedAddress();
 		if (connectedAddress != null) return connectedAddress;
 		return udpRemoteAddress;
 	}
@@ -307,7 +307,7 @@ public class Connection {
 	 * the buffer before being given to the SocketChannel for sending. The Harmony SocketChannel implementation in Android 1.6
 	 * ignores the buffer position, always copying from the beginning of the buffer. This is fixed in Android 2.0+. */
 	public void setBufferPositionFix (boolean bufferPositionFix) {
-		tcp.bufferPositionFix = bufferPositionFix;
+		tcp.setBufferPositionFix(bufferPositionFix);
 	}
 
 	/** Sets the friendly name of this connection. This is returned by {@link #toString()} and is useful for providing application
@@ -319,18 +319,18 @@ public class Connection {
 
 	/** Returns the number of bytes that are waiting to be written to the TCP socket, if any. */
 	public int getTcpWriteBufferSize () {
-		return tcp.writeBuffer.position();
+		return tcp.getWriteBuffer().position();
 	}
 
 	/** @see #setIdleThreshold(float) */
 	public boolean isIdle () {
-		return tcp.writeBuffer.position() / (float)tcp.writeBuffer.capacity() < tcp.idleThreshold;
+		return tcp.getWriteBuffer().position() / (float)tcp.getWriteBuffer().capacity() < tcp.getIdleThreshold();
 	}
 
 	/** If the percent of the TCP write buffer that is filled is less than the specified threshold,
 	 * {@link Listener#idle(Connection)} will be called for each network thread update. Default is 0.1. */
 	public void setIdleThreshold (float idleThreshold) {
-		tcp.idleThreshold = idleThreshold;
+		tcp.setIdleThreshold(idleThreshold);
 	}
 
 	public String toString () {

@@ -120,7 +120,7 @@ public class Server implements EndPoint {
 
 		this.serialization = serialization;
 
-		this.discoveryHandler = ServerDiscoveryHandler.DEFAULT;
+		this.discoveryHandler = ServerDiscoveryHandler.Companion.getDEFAULT();
 
 		try {
 			selector = Selector.open();
@@ -319,7 +319,7 @@ public class Server implements EndPoint {
 									addConnection(connection);
 									connection.sendTCP(new RegisterUDP());
 									if (DEBUG)
-										debug("kryonet", "Port " + udp.datagramChannel.socket().getLocalPort() + "/UDP connected to: "
+										debug("kryonet", "Port " + udp.getDatagramChannel().socket().getLocalPort() + "/UDP connected to: "
 											+ fromAddress);
 									connection.notifyConnected();
 									continue;
@@ -330,9 +330,9 @@ public class Server implements EndPoint {
 							}
 							if (object instanceof DiscoverHost) {
 								try {
-									boolean responseSent = discoveryHandler
-										.onDiscoverHost(udp.datagramChannel, fromAddress, serialization);
-									if (DEBUG && responseSent) debug("kryonet", "Responded to host discovery from: " + fromAddress);
+									discoveryHandler
+										.onDiscoverHost(udp.getDatagramChannel(), fromAddress, serialization);
+									if (DEBUG) debug("kryonet", "Responded to host discovery from: " + fromAddress);
 								} catch (IOException ex) {
 									if (WARN) warn("kryonet", "Error replying to host discovery from: " + fromAddress, ex);
 								}

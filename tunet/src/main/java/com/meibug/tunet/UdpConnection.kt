@@ -86,8 +86,7 @@ internal class UdpConnection(private val serialization: Serialization, bufferSiz
             connectedAddress = remoteAddress
         } catch (ex: IOException) {
             close()
-            val ioEx = IOException("Unable to connect to: " + remoteAddress)
-            ioEx.initCause(ex)
+            val ioEx = IOException("Unable to connect to: " + remoteAddress, ex)
             throw ioEx
         }
 
@@ -100,7 +99,7 @@ internal class UdpConnection(private val serialization: Serialization, bufferSiz
         return datagramChannel.receive(readBuffer) as InetSocketAddress
     }
 
-    fun readObject(connection: Connection): Any {
+    fun readObject(connection: Connection?): Any {
         readBuffer.flip()
         try {
             try {

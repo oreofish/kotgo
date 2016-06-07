@@ -71,19 +71,21 @@ class DiscoverHostTest : KryoNetTestCase() {
     @Throws(IOException::class)
     fun testCustomBroadcast() {
 
-        val serverDiscoveryHandler = ServerDiscoveryHandler { datagramChannel, fromAddress, serialization ->
-            val packet = DiscoveryResponsePacket()
-            packet.id = 42
-            packet.gameName = "gameName"
-            packet.playerName = "playerName"
+        val serverDiscoveryHandler = object: ServerDiscoveryHandler {
+            override fun onDiscoverHost(datagramChannel: DatagramChannel, fromAddress: InetSocketAddress, serialization: Serialization): Boolean {
+                val packet = DiscoveryResponsePacket()
+                packet.id = 42
+                packet.gameName = "gameName"
+                packet.playerName = "playerName"
 
-            val buffer = ByteBuffer.allocate(256)
-            serialization.write(null, buffer, packet)
-            buffer.flip()
+                val buffer = ByteBuffer.allocate(256)
+                serialization.write(null, buffer, packet)
+                buffer.flip()
 
-            datagramChannel.send(buffer, fromAddress)
+                datagramChannel.send(buffer, fromAddress)
 
-            true
+                return true
+            }
         }
 
         val clientDiscoveryHandler = object : ClientDiscoveryHandler {

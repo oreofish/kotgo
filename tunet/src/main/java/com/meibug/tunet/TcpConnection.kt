@@ -115,8 +115,7 @@ internal class TcpConnection(val serialization: Serialization, writeBufferSize: 
             lastWriteTime = System.currentTimeMillis()
         } catch (ex: IOException) {
             close()
-            val ioEx = IOException("Unable to connect to: " + remoteAddress)
-            ioEx.initCause(ex)
+            val ioEx = IOException("Unable to connect to: " + remoteAddress, ex)
             throw ioEx
         }
 

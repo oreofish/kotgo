@@ -167,7 +167,7 @@ public class Client extends Connection implements EndPoint {
 		}
 		id = -1;
 		try {
-			if (udpPort != -1) udp = new UdpConnection(serialization, tcp.readBuffer.capacity());
+			if (udpPort != -1) udp = new UdpConnection(serialization, tcp.getReadBuffer().capacity());
 
 			long endTime;
 			synchronized (updateLock) {
@@ -295,8 +295,8 @@ public class Client extends Connection implements EndPoint {
 												udpRegistrationLock.notifyAll();
 												if (TRACE) trace("kryonet", this + " received UDP: RegisterUDP");
 												if (DEBUG) {
-													debug("kryonet", "Port " + udp.datagramChannel.socket().getLocalPort()
-														+ "/UDP connected to: " + udp.connectedAddress);
+													debug("kryonet", "Port " + udp.getDatagramChannel().socket().getLocalPort()
+														+ "/UDP connected to: " + udp.getConnectedAddress());
 												}
 												setConnected(true);
 											}
@@ -443,7 +443,7 @@ public class Client extends Connection implements EndPoint {
 	 * zero to disable. Defaults to 19000. */
 	public void setKeepAliveUDP (int keepAliveMillis) {
 		if (udp == null) throw new IllegalStateException("Not connected via UDP.");
-		udp.keepAliveMillis = keepAliveMillis;
+		udp.setKeepAliveMillis(keepAliveMillis);
 	}
 
 	public Thread getUpdateThread () {
