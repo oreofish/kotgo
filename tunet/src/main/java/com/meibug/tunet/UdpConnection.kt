@@ -103,11 +103,11 @@ internal class UdpConnection(private val serialization: Serialization, bufferSiz
         readBuffer.flip()
         try {
             try {
-                val `object` = serialization.read(connection, readBuffer)
+                val obj = serialization.read(connection, readBuffer)
                 if (readBuffer.hasRemaining())
                     throw KryoNetException("Incorrect number of bytes (" + readBuffer.remaining()
-                            + " remaining) used to deserialize object: " + `object`)
-                return `object`
+                            + " remaining) used to deserialize object: " + obj)
+                return obj
             } catch (ex: Exception) {
                 throw KryoNetException("Error during deserialization.", ex)
             }
@@ -119,14 +119,14 @@ internal class UdpConnection(private val serialization: Serialization, bufferSiz
 
     /** This method is thread safe.  */
     @Throws(IOException::class)
-    fun send(connection: Connection, `object`: Any, address: SocketAddress): Int {
+    fun send(connection: Connection, obj: Any, address: SocketAddress): Int {
         val datagramChannel = this.datagramChannel ?: throw SocketException("Connection is closed.")
         synchronized (writeLock) {
             try {
                 try {
-                    serialization.write(connection, writeBuffer, `object`)
+                    serialization.write(connection, writeBuffer, obj)
                 } catch (ex: Exception) {
-                    throw KryoNetException("Error serializing object of type: " + `object`.javaClass.name, ex)
+                    throw KryoNetException("Error serializing object of type: " + obj.javaClass.name, ex)
                 }
 
                 writeBuffer.flip()

@@ -34,7 +34,7 @@ class PingPongTest : KryoNetTestCase() {
         val dataUDP = Data()
         populateData(dataUDP, false)
 
-        val server = Server()
+        val server = Server(objectBufferSize = 8192)
         startEndPoint(server)
         server.bind(KryoNetTestCase.tcpPort, KryoNetTestCase.udpPort)
         server.addListener(object : Listener() {
@@ -64,7 +64,7 @@ class PingPongTest : KryoNetTestCase() {
 
         // ----
 
-        val client = Client()
+        val client = Client(objectBufferSize = 8192)
         startEndPoint(client)
         client.addListener(object : Listener() {
             override fun received(connection: Connection, obj: Any) {

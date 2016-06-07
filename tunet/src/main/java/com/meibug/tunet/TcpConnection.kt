@@ -160,9 +160,9 @@ internal class TcpConnection(val serialization: Serialization, writeBufferSize: 
         val startPosition = readBuffer.position()
         val oldLimit = readBuffer.limit()
         readBuffer.limit(startPosition + length)
-        val `object`: Any
+        val obj: Any
         try {
-            `object` = serialization.read(connection, readBuffer)
+            obj = serialization.read(connection, readBuffer)
         } catch (ex: Exception) {
             throw KryoNetException("Error during deserialization.", ex)
         }
@@ -170,9 +170,9 @@ internal class TcpConnection(val serialization: Serialization, writeBufferSize: 
         readBuffer.limit(oldLimit)
         if (readBuffer.position() - startPosition != length)
             throw KryoNetException("Incorrect number of bytes (" + (startPosition + length - readBuffer.position())
-                    + " remaining) used to deserialize object: " + `object`)
+                    + " remaining) used to deserialize object: " + obj)
 
-        return `object`
+        return obj
     }
 
     @Throws(IOException::class)
@@ -206,7 +206,7 @@ internal class TcpConnection(val serialization: Serialization, writeBufferSize: 
 
     /** This method is thread safe.  */
     @Throws(IOException::class)
-    fun send(connection: Connection, `object`: Any): Int {
+    fun send(connection: Connection, obj: Any): Int {
         val socketChannel = this.socketChannel ?: throw SocketException("Connection is closed.")
         synchronized (writeLock) {
             // Leave room for length.
@@ -216,9 +216,9 @@ internal class TcpConnection(val serialization: Serialization, writeBufferSize: 
 
             // Write data.
             try {
-                serialization.write(connection, writeBuffer, `object`)
+                serialization.write(connection, writeBuffer, obj)
             } catch (ex: KryoNetException) {
-                throw KryoNetException("Error serializing object of type: " + `object`.javaClass.name, ex)
+                throw KryoNetException("Error serializing object of type: " + obj.javaClass.name, ex)
             }
 
             val end = writeBuffer.position()

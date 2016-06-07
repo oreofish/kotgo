@@ -29,9 +29,9 @@ interface EndPoint : Runnable {
     val serialization: Serialization
 
     /** If the listener already exists, it is not added again.  */
-    fun addListener(listener: Listener)
+    fun addListener(listener: Listener?)
 
-    fun removeListener(listener: Listener)
+    fun removeListener(listener: Listener?)
 
     /** Continually updates this end point until [.stop] is called.  */
     override fun run()
@@ -56,5 +56,5 @@ interface EndPoint : Runnable {
 
     /** Returns the last thread that called [.update] for this end point. This can be useful to detect when long running
      * code will be run on the update thread.  */
-    val updateThread: Thread
+    val updateThread: Thread?
 }
