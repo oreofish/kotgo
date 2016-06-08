@@ -364,13 +364,8 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
 
     private fun keepAlive() {
         val time = System.currentTimeMillis()
-        val connections = this.connections
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            val connection = connections[i]
+        for (connection in connections) {
             if (connection.tcp.needsKeepAlive(time)) connection.sendTCP(FrameworkMessage.keepAlive)
-            i++
         }
     }
 
@@ -452,74 +447,44 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
     // BOZO - Provide mechanism for sending to multiple clients without serializing multiple times.
 
     fun sendToAllTCP(obj: Any) {
-        val connections = this.connections
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            val connection = connections[i]
+        for(connection in connections) {
             connection.sendTCP(obj)
-            i++
         }
     }
 
     fun sendToAllExceptTCP(connectionID: Int, obj: Any) {
-        val connections = this.connections
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            val connection = connections[i]
+        for (connection in connections) {
             if (connection.id != connectionID) connection.sendTCP(obj)
-            i++
         }
     }
 
     fun sendToTCP(connectionID: Int, obj: Any) {
-        val connections = this.connections
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            val connection = connections[i]
+        for (connection in connections) {
             if (connection.id == connectionID) {
                 connection.sendTCP(obj)
                 break
             }
-            i++
         }
     }
 
     fun sendToAllUDP(obj: Any) {
-        val connections = this.connections
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            val connection = connections[i]
+        for (connection in connections) {
             connection.sendUDP(obj)
-            i++
         }
     }
 
     fun sendToAllExceptUDP(connectionID: Int, obj: Any) {
-        val connections = this.connections
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            val connection = connections[i]
+        for (connection in connections) {
             if (connection.id != connectionID) connection.sendUDP(obj)
-            i++
         }
     }
 
     fun sendToUDP(connectionID: Int, obj: Any) {
-        val connections = this.connections
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            val connection = connections[i]
+        for (connection in connections) {
             if (connection.id == connectionID) {
                 connection.sendUDP(obj)
                 break
             }
-            i++
         }
     }
 
@@ -542,33 +507,22 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
 
     /** Closes all open connections and the server port(s).  */
     override fun close() {
-        var connections = this.connections
         if (INFO && connections.size > 0) info("kryonet", "Closing server connections...")
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            connections[i].close()
-            i++
+        for (connection in connections) {
+            connection.close()
         }
         connections = arrayListOf<Connection>()
 
-        val serverChannel = this.serverChannel
-        if (serverChannel != null) {
-            try {
-                serverChannel.close()
-                if (INFO) info("kryonet", "Server closed.")
-            } catch (ex: IOException) {
-                if (DEBUG) debug("kryonet", "Unable to close server.", ex)
-            }
-
-            this.serverChannel = null
+        try {
+            serverChannel?.close()
+            if (INFO) info("kryonet", "Server closed.")
+        } catch (ex: IOException) {
+            if (DEBUG) debug("kryonet", "Unable to close server.", ex)
         }
+        serverChannel = null
 
-        val udp = this.udp
-        if (udp != null) {
-            udp.close()
-            this.udp = null
-        }
+        udp?.close()
+        udp = null
 
         synchronized (updateLock) { // Blocks to avoid a select while the selector is used to bind the server connection.
         }
