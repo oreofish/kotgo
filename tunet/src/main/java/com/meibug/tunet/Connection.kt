@@ -38,6 +38,7 @@ import com.meibug.tunet.util.Log.debug
 import com.meibug.tunet.util.Log.error
 import com.meibug.tunet.util.Log.info
 import com.meibug.tunet.util.Log.trace
+import java.util.concurrent.CopyOnWriteArrayList
 
 // BOZO - Layer to handle handshake state.
 
@@ -57,7 +58,7 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
     internal var tcp: TcpConnection
     internal var udp: UdpConnection? = null
     internal var udpRemoteAddress: InetSocketAddress? = null
-    private var listeners = arrayOf<Listener?>()
+    private var listeners = CopyOnWriteArrayList<Listener>()
     private val listenerLock = Object()
     private var lastPingID: Int = 0
     private var lastPingSendTime: Long = 0
@@ -68,6 +69,7 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
     /** Returns true if this connection is connected to the remote end. Note that a connection can become disconnected at any time.  */
     @Volatile var isConnected: Boolean = false
         internal set(isConnected) {
+            field = isConnected
             if (isConnected && name == null) name = "Connection " + id
         }
     /**
@@ -197,41 +199,20 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
     }
 
     /** If the listener already exists, it is not added again.  */
-    open fun addListener(listener: Listener?) {
-        if (listener == null) throw IllegalArgumentException("listener cannot be null.")
+    open fun addListener(listener: Listener) {
+        // if (listener == null) throw IllegalArgumentException("listener cannot be null.")
         synchronized (listenerLock) {
-            val listeners = this.listeners
-            val n = listeners.size
-            for (i in 0..n - 1)
-                if (listener === listeners[i]) return
-            val newListeners = arrayOfNulls<Listener>(n + 1)
-            newListeners[0] = listener
-            System.arraycopy(listeners, 0, newListeners, 1, n)
-            this.listeners = newListeners
+            if (listeners.indexOf(listener) == -1) {
+                listeners.add(0, listener)
+            }
         }
         if (TRACE) trace("kryonet", "Connection listener added: " + listener.javaClass.name)
     }
 
-    open fun removeListener(listener: Listener?) {
+    open fun removeListener(listener: Listener) {
         if (listener == null) throw IllegalArgumentException("listener cannot be null.")
         synchronized (listenerLock) {
-            val listeners = this.listeners
-            val n = listeners.size
-            if (n == 0) return
-            val newListeners = arrayOfNulls<Listener>(n - 1)
-            var i = 0
-            var ii = 0
-            while (i < n) {
-                val copyListener = listeners[i]
-                if (listener === copyListener) {
-                    i++
-                    continue
-                }
-                if (ii == n - 1) return
-                newListeners[ii++] = copyListener
-                i++
-            }
-            this.listeners = newListeners
+            listeners.remove(listener)
         }
         if (TRACE) trace("kryonet", "Connection listener removed: " + listener.javaClass.name)
     }
@@ -247,33 +228,21 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
                 }
             }
         }
-        val listeners = this.listeners
-        var i = 0
-        val n = listeners.size
-        while (i < n) {
-            listeners[i]?.connected(this)
-            i++
+        for (listener in listeners) {
+            listener?.connected(this)
         }
     }
 
     internal fun notifyDisconnected() {
-        val listeners = this.listeners
-        var i = 0
-        val n = listeners.size
-        while (i < n) {
-            listeners[i]?.disconnected(this)
-            i++
+        for (listener in listeners) {
+            listener?.disconnected(this)
         }
     }
 
     internal fun notifyIdle() {
-        val listeners = this.listeners
-        var i = 0
-        val n = listeners.size
-        while (i < n) {
-            listeners[i]?.idle(this)
+        for (listener in listeners) {
+            listener?.idle(this)
             if (!isIdle) break
-            i++
         }
     }
 
@@ -289,26 +258,16 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
                 sendTCP(obj)
             }
         }
-        val listeners = this.listeners
-        var i = 0
-        val n = listeners.size
-        while (i < n) {
-            listeners[i]?.received(this, obj)
-            i++
+
+        for (listener in listeners) {
+            listener?.received(this, obj)
         }
     }
 
     /** Returns the IP address and port of the remote end of the TCP connection, or null if this connection is not connected.  */
     val remoteAddressTCP: InetSocketAddress?
         get() {
-            val socketChannel = tcp.socketChannel
-            if (socketChannel != null) {
-                val socket = tcp.socketChannel!!.socket()
-                if (socket != null) {
-                    return socket.remoteSocketAddress as InetSocketAddress
-                }
-            }
-            return null
+            return tcp.socketChannel?.socket()?.remoteSocketAddress as InetSocketAddress
         }
 
     /** Returns the IP address and port of the remote end of the UDP connection, or null if this connection is not connected.  */

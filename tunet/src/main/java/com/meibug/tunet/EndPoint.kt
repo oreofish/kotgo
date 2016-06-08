@@ -29,9 +29,9 @@ interface EndPoint : Runnable {
     val serialization: Serialization
 
     /** If the listener already exists, it is not added again.  */
-    fun addListener(listener: Listener?)
+    fun addListener(listener: Listener)
 
-    fun removeListener(listener: Listener?)
+    fun removeListener(listener: Listener)
 
     /** Continually updates this end point until [.stop] is called.  */
     override fun run()

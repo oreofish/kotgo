@@ -45,6 +45,7 @@ import com.meibug.tunet.util.Log.error
 import com.meibug.tunet.util.Log.info
 import com.meibug.tunet.util.Log.trace
 import com.meibug.tunet.util.Log.warn
+import java.util.concurrent.CopyOnWriteArrayList
 
 /** Manages TCP and optionally UDP connections from many [Clients][Client].
  * @author Nathan Sweet @n4te.com>
@@ -55,7 +56,7 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
     private var serverChannel: ServerSocketChannel? = null
     private var udp: UdpConnection? = null
     /** Returns the current connections. The array returned should not be modified.  */
-    var connections = arrayListOf<Connection>()
+    var connections = CopyOnWriteArrayList<Connection>()
         private set
     private val pendingConnections = HashMap<Int, Connection>()
     internal var listeners = arrayListOf<Listener>()
@@ -69,23 +70,23 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
     private val dispatchListener = object : Listener() {
         override fun connected(connection: Connection) {
             val listeners = this@Server.listeners
-            for (listener in listeners) listener?.connected(connection)
+            for (listener in listeners) listener.connected(connection)
         }
 
         override fun disconnected(connection: Connection) {
             removeConnection(connection)
             val listeners = this@Server.listeners
-            for (listener in listeners) listener?.disconnected(connection)
+            for (listener in listeners) listener.disconnected(connection)
         }
 
         override fun received(connection: Connection, obj: Any) {
             val listeners = this@Server.listeners
-            for (listener in listeners) listener?.received(connection, obj)
+            for (listener in listeners) listener.received(connection, obj)
         }
 
         override fun idle(connection: Connection) {
             val listeners = this@Server.listeners
-            for (listener in listeners) listener?.idle(connection)
+            for (listener in listeners) listener.idle(connection)
         }
     }
 
@@ -488,8 +489,8 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
         }
     }
 
-    override fun addListener(listener: Listener?) {
-        if (listener == null) throw IllegalArgumentException("listener cannot be null.")
+    override fun addListener(listener: Listener) {
+        // if (listener == null) throw IllegalArgumentException("listener cannot be null.")
         synchronized (listenerLock) {
             if (listeners.contains(listener)) return
             listeners.add(0, listener)
@@ -497,7 +498,7 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
         if (TRACE) trace("kryonet", "Server listener added: " + listener.javaClass.name)
     }
 
-    override fun removeListener(listener: Listener?) {
+    override fun removeListener(listener: Listener) {
         if (listener == null) throw IllegalArgumentException("listener cannot be null.")
         synchronized (listenerLock) {
             listeners.remove(listener)
@@ -511,7 +512,7 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
         for (connection in connections) {
             connection.close()
         }
-        connections = arrayListOf<Connection>()
+        connections = CopyOnWriteArrayList<Connection>()
 
         try {
             serverChannel?.close()

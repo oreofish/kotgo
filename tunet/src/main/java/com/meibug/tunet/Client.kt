@@ -393,12 +393,12 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
         selector!!.close()
     }
 
-    override fun addListener(listener: Listener?) {
+    override fun addListener(listener: Listener) {
         super.addListener(listener)
         if (TRACE) trace("kryonet", "Client listener added.")
     }
 
-    override fun removeListener(listener: Listener?) {
+    override fun removeListener(listener: Listener) {
         super.removeListener(listener)
         if (TRACE) trace("kryonet", "Client listener removed.")
     }
