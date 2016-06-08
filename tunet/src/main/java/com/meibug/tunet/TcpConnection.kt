@@ -28,7 +28,6 @@ import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
 import java.nio.channels.SocketChannel
 
-import com.meibug.tunet.util.Log.*
 import com.meibug.tunet.util.Log.DEBUG
 import com.meibug.tunet.util.Log.TRACE
 import com.meibug.tunet.util.Log.debug

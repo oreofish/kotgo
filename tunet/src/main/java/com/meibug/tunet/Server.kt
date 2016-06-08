@@ -34,7 +34,6 @@ import java.util.ArrayList
 import java.util.Arrays
 import java.util.HashMap
 
-import com.meibug.tunet.util.Log.*
 import com.meibug.tunet.util.Log.DEBUG
 import com.meibug.tunet.util.Log.ERROR
 import com.meibug.tunet.util.Log.INFO
@@ -347,19 +346,14 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
             }
         }
         val time = System.currentTimeMillis()
-        val connections = this.connections
-        var i = 0
-        val n = connections.size
-        while (i < n) {
-            val connection = connections[i]
-            if (connection.tcp.isTimedOut(time)) {
-                if (DEBUG) debug("kryonet", connection.toString() + " timed out.")
-                connection.close()
+        connections.map {
+            if (it.tcp.isTimedOut(time)) {
+                if (DEBUG) debug("kryonet", it.toString() + " timed out.")
+                it.close()
             } else {
-                if (connection.tcp.needsKeepAlive(time)) connection.sendTCP(FrameworkMessage.keepAlive)
+                if (it.tcp.needsKeepAlive(time)) it.sendTCP(FrameworkMessage.keepAlive)
             }
-            if (connection.isIdle) connection.notifyIdle()
-            i++
+            if (it.isIdle) it.notifyIdle()
         }
     }
 
@@ -447,17 +441,9 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
 
     // BOZO - Provide mechanism for sending to multiple clients without serializing multiple times.
 
-    fun sendToAllTCP(obj: Any) {
-        for(connection in connections) {
-            connection.sendTCP(obj)
-        }
-    }
+    fun sendToAllTCP(obj: Any) = connections.map { it.sendTCP(obj) }
 
-    fun sendToAllExceptTCP(connectionID: Int, obj: Any) {
-        for (connection in connections) {
-            if (connection.id != connectionID) connection.sendTCP(obj)
-        }
-    }
+    fun sendToAllExceptTCP(connectionID: Int, obj: Any) = connections.map { if (it.id != connectionID) it.sendTCP(obj) }
 
     fun sendToTCP(connectionID: Int, obj: Any) {
         for (connection in connections) {
@@ -468,17 +454,9 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
         }
     }
 
-    fun sendToAllUDP(obj: Any) {
-        for (connection in connections) {
-            connection.sendUDP(obj)
-        }
-    }
+    fun sendToAllUDP(obj: Any) = connections.map { it.sendUDP(obj) }
 
-    fun sendToAllExceptUDP(connectionID: Int, obj: Any) {
-        for (connection in connections) {
-            if (connection.id != connectionID) connection.sendUDP(obj)
-        }
-    }
+    fun sendToAllExceptUDP(connectionID: Int, obj: Any) = connections.map { if (it.id != connectionID) it.sendUDP(obj) }
 
     fun sendToUDP(connectionID: Int, obj: Any) {
         for (connection in connections) {
@@ -499,7 +477,7 @@ class Server @JvmOverloads constructor(private val writeBufferSize: Int = 16384,
     }
 
     override fun removeListener(listener: Listener) {
-        if (listener == null) throw IllegalArgumentException("listener cannot be null.")
+        // if (listener == null) throw IllegalArgumentException("listener cannot be null.")
         synchronized (listenerLock) {
             listeners.remove(listener)
         }

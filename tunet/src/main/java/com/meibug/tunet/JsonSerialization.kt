@@ -33,7 +33,6 @@ import java.io.OutputStreamWriter
 import java.io.UnsupportedEncodingException
 import java.nio.ByteBuffer
 
-import com.meibug.tunet.util.Log.*
 import com.meibug.tunet.util.Log.INFO
 import com.meibug.tunet.util.Log.info
 import java.nio.charset.Charset

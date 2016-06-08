@@ -142,7 +142,7 @@ class DiscoverHostTest : KryoNetTestCase() {
         // ----
 
         val client = Client()
-        client.setDiscoveryHandler(clientDiscoveryHandler)
+        client.discoveryHandler = clientDiscoveryHandler
 
         val host = client.discoverHost(KryoNetTestCase.udpPort, 2000)
         if (host == null) {

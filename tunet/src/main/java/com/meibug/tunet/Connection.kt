@@ -29,7 +29,6 @@ import java.net.SocketAddress
 import java.net.SocketException
 import java.nio.channels.SocketChannel
 
-import com.meibug.tunet.util.Log.*
 import com.meibug.tunet.util.Log.DEBUG
 import com.meibug.tunet.util.Log.ERROR
 import com.meibug.tunet.util.Log.INFO
@@ -89,8 +88,8 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
      * *
      * @see Kryo.register
      */
-    fun sendTCP(obj: Any?): Int {
-        if (obj == null) throw IllegalArgumentException("object cannot be null.")
+    fun sendTCP(obj: Any): Int {
+        // if (obj == null) throw IllegalArgumentException("object cannot be null.")
         try {
             val length = tcp.send(this, obj)
             if (length == 0) {
@@ -122,8 +121,8 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
      * @see Kryo.register
      * @throws IllegalStateException if this connection was not opened with both TCP and UDP.
      */
-    fun sendUDP(obj: Any?): Int {
-        if (obj == null) throw IllegalArgumentException("object cannot be null.")
+    fun sendUDP(obj: Any): Int {
+        // if (obj == null) throw IllegalArgumentException("object cannot be null.")
         var address: SocketAddress? = udpRemoteAddress
         if (address == null && udp != null) address = udp!!.connectedAddress
         if (address == null && isConnected) throw IllegalStateException("Connection is not connected via UDP.")
@@ -210,7 +209,7 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
     }
 
     open fun removeListener(listener: Listener) {
-        if (listener == null) throw IllegalArgumentException("listener cannot be null.")
+        // if (listener == null) throw IllegalArgumentException("listener cannot be null.")
         synchronized (listenerLock) {
             listeners.remove(listener)
         }
@@ -229,19 +228,19 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
             }
         }
         for (listener in listeners) {
-            listener?.connected(this)
+            listener.connected(this)
         }
     }
 
     internal fun notifyDisconnected() {
         for (listener in listeners) {
-            listener?.disconnected(this)
+            listener.disconnected(this)
         }
     }
 
     internal fun notifyIdle() {
         for (listener in listeners) {
-            listener?.idle(this)
+            listener.idle(this)
             if (!isIdle) break
         }
     }
@@ -260,7 +259,7 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
         }
 
         for (listener in listeners) {
-            listener?.received(this, obj)
+            listener.received(this, obj)
         }
     }
 
@@ -287,9 +286,9 @@ open class Connection(serialization: Serialization, writeBufferSize: Int, object
     /** Sets the friendly name of this connection. This is returned by [.toString] and is useful for providing application
      * specific identifying information in the logging. May be null for the default name of "Connection X", where X is the
      * connection ID.  */
-    fun setName(name: String) {
+/*    fun setName(name: String) {
         this.name = name
-    }
+    }*/
 
     /** Returns the number of bytes that are waiting to be written to the TCP socket, if any.  */
     val tcpWriteBufferSize: Int

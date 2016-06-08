@@ -38,7 +38,6 @@ import java.security.AccessControlException
 import java.util.ArrayList
 import java.util.Collections
 
-import com.meibug.tunet.util.Log.*
 import com.meibug.tunet.util.Log.DEBUG
 import com.meibug.tunet.util.Log.ERROR
 import com.meibug.tunet.util.Log.INFO
@@ -52,7 +51,7 @@ import com.meibug.tunet.util.Log.trace
  * @author Nathan Sweet @n4te.com>
  */
 class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBufferSize: Int = 2048, override var serialization: Serialization = JsonSerialization()) : Connection(serialization, writeBufferSize, objectBufferSize), EndPoint {
-    private var selector: Selector? = null
+    lateinit private var selector: Selector
     private var emptySelects: Int = 0
     @Volatile private var tcpRegistered: Boolean = false
     @Volatile private var udpRegistered: Boolean = false
@@ -66,37 +65,23 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
     private var connectTcpPort: Int = 0
     private var connectUdpPort: Int = 0
     private var isClosed: Boolean = false
-    private var discoveryHandler: ClientDiscoveryHandler? = null
+    var discoveryHandler = ClientDiscoveryHandler.DEFAULT
 
     init {
         endPoint = this
-        this.discoveryHandler = ClientDiscoveryHandler.DEFAULT
 
         try {
             selector = Selector.open()
         } catch (ex: IOException) {
             throw RuntimeException("Error opening selector.", ex)
         }
-
-    }
-
-    fun setDiscoveryHandler(newDiscoveryHandler: ClientDiscoveryHandler) {
-        discoveryHandler = newDiscoveryHandler
-    }
-
-    /** Opens a TCP only client.
-     * @see .connect
-     */
-    @Throws(IOException::class)
-    fun connect(timeout: Int, host: String, tcpPort: Int) {
-        connect(timeout, InetAddress.getByName(host), tcpPort, -1)
     }
 
     /** Opens a TCP and UDP client.
      * @see .connect
      */
     @Throws(IOException::class)
-    fun connect(timeout: Int, host: String, tcpPort: Int, udpPort: Int) {
+    fun connect(timeout: Int, host: String, tcpPort: Int, udpPort: Int = -1) {
         connect(timeout, InetAddress.getByName(host), tcpPort, udpPort)
     }
 
@@ -120,26 +105,26 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
         this.connectUdpPort = udpPort
         close()
         if (INFO) {
-            if (udpPort != -1)
-                info("kryonet", "Connecting: $host:$tcpPort/$udpPort")
-            else
-                info("kryonet", "Connecting: $host:$tcpPort")
+            when (udpPort) {
+                -1 -> info("kryonet", "Connecting: $host:$tcpPort/$udpPort")
+                else -> info("kryonet", "Connecting: $host:$tcpPort")
+            }
         }
         id = -1
         try {
             if (udpPort != -1) udp = UdpConnection(serialization!!, tcp.readBuffer.capacity())
 
-            var endTime: Long? = null
+            var endTime: Long = 0
             synchronized (updateLock) {
                 tcpRegistered = false
-                selector!!.wakeup()
+                selector.wakeup()
                 endTime = System.currentTimeMillis() + timeout
-                tcp.connect(selector!!, InetSocketAddress(host, tcpPort), 5000)
+                tcp.connect(selector, InetSocketAddress(host, tcpPort), 5000)
             }
 
             // Wait for RegisterTCP.
             synchronized (tcpRegistrationLock) {
-                while (!tcpRegistered && System.currentTimeMillis() < endTime!!) {
+                while (!tcpRegistered && System.currentTimeMillis() < endTime) {
                     try {
                         tcpRegistrationLock.wait(100)
                     } catch (ignored: InterruptedException) {
@@ -155,13 +140,13 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
                 val udpAddress = InetSocketAddress(host, udpPort)
                 synchronized (updateLock) {
                     udpRegistered = false
-                    selector!!.wakeup()
-                    udp?.connect(selector!!, udpAddress)
+                    selector.wakeup()
+                    udp?.connect(selector, udpAddress)
                 }
 
                 // Wait for RegisterUDP reply.
                 synchronized (udpRegistrationLock) {
-                    while (!udpRegistered && System.currentTimeMillis() < endTime!!) {
+                    while (!udpRegistered && System.currentTimeMillis() < endTime) {
                         val registerUDP = RegisterUDP()
                         registerUDP.connectionID = id
                         udp?.send(this, registerUDP, udpAddress)
@@ -204,9 +189,9 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
         val startTime = System.currentTimeMillis()
         var select = 0
         if (timeout > 0) {
-            select = selector!!.select(timeout.toLong())
+            select = selector.select(timeout.toLong())
         } else {
-            select = selector!!.selectNow()
+            select = selector.selectNow()
         }
         if (select == 0) {
             emptySelects++
@@ -223,7 +208,7 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
         } else {
             emptySelects = 0
             isClosed = false
-            val keys = selector!!.selectedKeys()
+            val keys = selector.selectedKeys()
             synchronized (keys) {
                 val iter = keys.iterator()
                 while (iter.hasNext()) {
@@ -367,7 +352,7 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
         close()
         if (TRACE) trace("kryonet", "Client thread stopping.")
         shutdown = true
-        selector!!.wakeup()
+        selector.wakeup()
     }
 
     override fun close() {
@@ -377,9 +362,9 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
         // Select one last time to complete closing the socket.
         if (!isClosed) {
             isClosed = true
-            selector!!.wakeup()
+            selector.wakeup()
             try {
-                selector!!.selectNow()
+                selector.selectNow()
             } catch (ignored: IOException) {
             }
 
@@ -390,7 +375,7 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
     @Throws(IOException::class)
     fun dispose() {
         close()
-        selector!!.close()
+        selector.close()
     }
 
     override fun addListener(listener: Listener) {
@@ -452,7 +437,7 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
             socket = DatagramSocket()
             broadcast(udpPort, socket)
             socket.soTimeout = timeoutMillis
-            val packet = discoveryHandler!!.onRequestNewDatagramPacket()
+            val packet = discoveryHandler.onRequestNewDatagramPacket()
             try {
                 socket.receive(packet)
             } catch (ex: SocketTimeoutException) {
@@ -461,14 +446,14 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
             }
 
             if (INFO) info("kryonet", "Discovered server: " + packet.address)
-            discoveryHandler!!.onDiscoveredHost(packet, serialization)
+            discoveryHandler.onDiscoveredHost(packet, serialization)
             return packet.address
         } catch (ex: IOException) {
             if (ERROR) error("kryonet", "Host discovery failed.", ex)
             return null
         } finally {
             if (socket != null) socket.close()
-            discoveryHandler!!.onFinally()
+            discoveryHandler.onFinally()
         }
     }
 
@@ -485,7 +470,7 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
             broadcast(udpPort, socket)
             socket.soTimeout = timeoutMillis
             while (true) {
-                val packet = discoveryHandler!!.onRequestNewDatagramPacket()
+                val packet = discoveryHandler.onRequestNewDatagramPacket()
                 try {
                     socket.receive(packet)
                 } catch (ex: SocketTimeoutException) {
@@ -494,7 +479,7 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
                 }
 
                 if (INFO) info("kryonet", "Discovered server: " + packet.address)
-                discoveryHandler!!.onDiscoveredHost(packet, serialization)
+                discoveryHandler.onDiscoveredHost(packet, serialization)
                 hosts.add(packet.address)
             }
         } catch (ex: IOException) {
@@ -502,7 +487,7 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
             return hosts
         } finally {
             if (socket != null) socket.close()
-            discoveryHandler!!.onFinally()
+            discoveryHandler.onFinally()
         }
     }
 

@@ -17,31 +17,31 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.meibug.tunet.util;
+package com.meibug.tunet.util
 
-import com.meibug.tunet.Connection;
-import com.meibug.tunet.Listener;
+import com.meibug.tunet.Connection
+import com.meibug.tunet.Listener
 
-abstract public class TcpIdleSender extends Listener {
-	boolean started;
+abstract class TcpIdleSender : Listener() {
+    internal var started: Boolean = false
 
-	public void idle (Connection connection) {
-		if (!started) {
-			started = true;
-			start();
-		}
-		Object object = next();
-		if (object == null)
-			connection.removeListener(this);
-		else
-			connection.sendTCP(object);
-	}
+    override fun idle(connection: Connection) {
+        if (!started) {
+            started = true
+            start()
+        }
+        val obj = next()
+        if (obj == null)
+            connection.removeListener(this)
+        else
+            connection.sendTCP(obj)
+    }
 
-	/** Called once, before the first send. Subclasses can override this method to send something so the receiving side expects
-	 * subsequent objects. */
-	protected void start () {
-	}
+    /** Called once, before the first send. Subclasses can override this method to send something so the receiving side expects
+     * subsequent objects.  */
+    protected open fun start() {
+    }
 
-	/** Returns the next object to send, or null if no more objects will be sent. */
-	abstract protected Object next ();
+    /** Returns the next object to send, or null if no more objects will be sent.  */
+    protected abstract operator fun next(): Any?
 }

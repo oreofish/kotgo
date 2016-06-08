@@ -17,40 +17,35 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-package com.meibug.tunet.util;
+package com.meibug.tunet.util
 
-import com.meibug.tunet.KryoNetException;
+import com.meibug.tunet.KryoNetException
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.IOException
+import java.io.InputStream
 
-abstract public class InputStreamSender extends TcpIdleSender {
-	private final InputStream input;
-	private final byte[] chunk;
+abstract class InputStreamSender(private val input: InputStream, chunkSize: Int) : TcpIdleSender() {
+    private val chunk = ByteArray(chunkSize)
 
-	public InputStreamSender (InputStream input, int chunkSize) {
-		this.input = input;
-		chunk = new byte[chunkSize];
-	}
+    override fun next(): Any {
+        try {
+            var total = 0
+            while (total < chunk.size) {
+                val count = input.read(chunk, total, chunk.size - total)
+                if (count < 0) {
+                    if (total == 0) return Any()
+                    val partial = ByteArray(total)
+                    System.arraycopy(chunk, 0, partial, 0, total)
+                    return next(partial)
+                }
+                total += count
+            }
+        } catch (ex: IOException) {
+            throw KryoNetException(ex)
+        }
 
-	protected final Object next () {
-		try {
-			int total = 0;
-			while (total < chunk.length) {
-				int count = input.read(chunk, total, chunk.length - total);
-				if (count < 0) {
-					if (total == 0) return null;
-					byte[] partial = new byte[total];
-					System.arraycopy(chunk, 0, partial, 0, total);
-					return next(partial);
-				}
-				total += count;
-			}
-		} catch (IOException ex) {
-			throw new KryoNetException(ex);
-		}
-		return next(chunk);
-	}
+        return next(chunk)
+    }
 
-	abstract protected Object next (byte[] chunk);
+    protected abstract fun next(chunk: ByteArray): Any
 }

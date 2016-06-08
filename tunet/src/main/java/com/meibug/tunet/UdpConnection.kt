@@ -28,7 +28,6 @@ import java.nio.channels.DatagramChannel
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
 
-import com.meibug.tunet.util.Log.*
 import com.meibug.tunet.util.Log.DEBUG
 import com.meibug.tunet.util.Log.debug
 

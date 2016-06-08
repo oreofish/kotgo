@@ -28,7 +28,6 @@ class JsonTest : KryoNetTestCase() {
 
     @Throws(IOException::class)
     fun testJson() {
-        var fail: String? = null
 
         val dataTCP = Data()
         populateData(dataTCP, true)
