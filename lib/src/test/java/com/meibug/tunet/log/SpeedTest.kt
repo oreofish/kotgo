@@ -9,7 +9,7 @@ import java.util.*
  */
 class SpeedTest : TestCase(){
     private var timer: Timer? = null
-    private val times = 100*1000*1000
+    private val times = 1*100*1000
 
     init {
         Log.set(Log.LEVEL_INFO)

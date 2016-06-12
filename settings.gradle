@@ -1,1 +1,1 @@
-include ':sample', ':data', ':component', ':tunet'
+include ':lib'
