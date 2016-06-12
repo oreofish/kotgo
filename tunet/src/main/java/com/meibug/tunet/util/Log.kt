@@ -72,11 +72,7 @@ object Log {
     }
 
     /** Sets the logger that will write the log messages.  */
-    fun setLogger(logger: Logger) {
-        Log.logger = logger
-    }
-
-    private var logger = Logger()
+    var logger = Logger()
 
     fun error(message: String, ex: Throwable) {
         if (ERROR) logger.log(LEVEL_ERROR, null, message, ex)

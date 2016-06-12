@@ -40,12 +40,12 @@ abstract class KryoNetTestCase : TestCase() {
     init {
         // Log.TRACE();
         // Log.DEBUG();
-        Log.setLogger(object : Logger() {
+        Log.logger = object : Logger() {
             override fun log(level: Int, category: String?, message: String, ex: Throwable?) {
                 // if (category == null || category.equals("kryonet")) //
                 super.log(level, category, message, ex)
             }
-        })
+        }
     }
 
     @Throws(Exception::class)

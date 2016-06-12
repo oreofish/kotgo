@@ -104,12 +104,14 @@ class Client @JvmOverloads constructor(writeBufferSize: Int = 8192, objectBuffer
         this.connectTcpPort = tcpPort
         this.connectUdpPort = udpPort
         close()
+
         if (INFO) {
             when (udpPort) {
                 -1 -> info("kryonet", "Connecting: $host:$tcpPort/$udpPort")
                 else -> info("kryonet", "Connecting: $host:$tcpPort")
             }
         }
+
         id = -1
         try {
             if (udpPort != -1) udp = UdpConnection(serialization!!, tcp.readBuffer.capacity())
